@@ -73,7 +73,7 @@ class WallpaperController extends StateNotifier<WallpaperState> {
     if (oldPath != null) {
       final oldFile = File(oldPath);
       if (await oldFile.exists()) {
-        await oldFile.delete().catchError((_) {});
+        try { await oldFile.delete(); } catch (_) {}
       }
     }
 
@@ -95,7 +95,7 @@ class WallpaperController extends StateNotifier<WallpaperState> {
     if (oldPath != null) {
       final oldFile = File(oldPath);
       if (await oldFile.exists()) {
-        await oldFile.delete().catchError((_) {});
+        try { await oldFile.delete(); } catch (_) {}
       }
     }
 
