@@ -16,8 +16,12 @@ class OnboardingController extends StateNotifier<bool?> {
   static const _kCompleted = 'onboarding_completed';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getBool(_kCompleted) ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool(_kCompleted) ?? false;
+    } catch (_) {
+      state = false;
+    }
   }
 
   Future<void> markCompleted() async {

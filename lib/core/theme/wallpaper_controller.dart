@@ -49,12 +49,16 @@ class WallpaperController extends StateNotifier<WallpaperState> {
   static const _keyUseDifferent = 'use_different_focus_wallpaper';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = WallpaperState(
-      wallpaperPath: prefs.getString(_keyWallpaper),
-      focusTimerWallpaperPath: prefs.getString(_keyFocusWallpaper),
-      useDifferentFocusWallpaper: prefs.getBool(_keyUseDifferent) ?? false,
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = WallpaperState(
+        wallpaperPath: prefs.getString(_keyWallpaper),
+        focusTimerWallpaperPath: prefs.getString(_keyFocusWallpaper),
+        useDifferentFocusWallpaper: prefs.getBool(_keyUseDifferent) ?? false,
+      );
+    } catch (_) {
+      state = const WallpaperState();
+    }
   }
 
   Future<void> setWallpaper(String sourcePath) async {
@@ -63,6 +67,15 @@ class WallpaperController extends StateNotifier<WallpaperState> {
         'wallpaper_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final destFile = File('${appDir.path}/$fileName');
     await File(sourcePath).copy(destFile.path);
+
+    // Delete old wallpaper files to prevent storage leaks
+    final oldPath = state.wallpaperPath;
+    if (oldPath != null) {
+      final oldFile = File(oldPath);
+      if (await oldFile.exists()) {
+        await oldFile.delete().catchError((_) {});
+      }
+    }
 
     state = state.copyWith(wallpaperPath: destFile.path);
 
@@ -76,6 +89,15 @@ class WallpaperController extends StateNotifier<WallpaperState> {
         'focus_wallpaper_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final destFile = File('${appDir.path}/$fileName');
     await File(sourcePath).copy(destFile.path);
+
+    // Delete old focus wallpaper files to prevent storage leaks
+    final oldPath = state.focusTimerWallpaperPath;
+    if (oldPath != null) {
+      final oldFile = File(oldPath);
+      if (await oldFile.exists()) {
+        await oldFile.delete().catchError((_) {});
+      }
+    }
 
     state = state.copyWith(focusTimerWallpaperPath: destFile.path);
 

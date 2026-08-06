@@ -1,13 +1,16 @@
 // ============================================================
 // FILE: android/.../accessibility/FocusAccessibilityService.kt
 // PURPOSE: Core detection engine — watches foreground app/window,
-//          decides block/allow via BlockDecisionEngine
-// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-03
+//          decides block/allow via BlockDecisionEngine.
+//          Persists session state to SharedPreferences so blocking
+//          survives service restarts and device reboots.
+// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-06
 // ============================================================
 package com.focusforge.app.accessibility
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
@@ -18,17 +21,21 @@ class FocusAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "FocusAccessibility"
+        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val KEY_SESSION_ACTIVE = "flutter.rules_session_active"
+        private const val KEY_STRICT_MODE = "flutter.rules_strict_mode"
+        private const val KEY_STUDY_MODE = "flutter.rules_youtube_study_mode"
+        private const val KEY_BLOCKED_APPS = "flutter.rules_blocked_apps"
+        private const val KEY_SHORTS_BLOCKED = "flutter.rules_blocked_shorts_apps"
+        private const val KEY_WHITELIST = "flutter.rules_youtube_whitelist"
 
-        // Singleton reference for Flutter to query state
         @Volatile
         var instance: FocusAccessibilityService? = null
             private set
 
-        // Block event counter for dashboard
         var blockEventCount: Int = 0
             private set
 
-        // Current foreground package
         var currentForegroundPackage: String? = null
             private set
 
@@ -38,12 +45,7 @@ class FocusAccessibilityService : AccessibilityService() {
          * the user's *currently* blocked apps, refreshed against
          * whenever session state changes, so newly-blocked apps aren't
          * silently ignored just because they weren't blocked when the
-         * service first connected. IMPORTANT: previously this filter
-         * was a hardcoded, never-updated list set once in
-         * onServiceConnected() — meaning any app the user later chose
-         * to block that wasn't already in that list would never
-         * generate accessibility events at all, so it could never
-         * actually be blocked. This is why blocking was unreliable.
+         * service first connected.
          */
         private val KNOWN_TARGET_PACKAGES = setOf(
             "com.instagram.android",
@@ -61,18 +63,73 @@ class FocusAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
-        applyWatchedPackages(emptySet())
+        // Restore persisted session state so blocking survives service restarts.
+        restoreSessionState()
         Log.i(TAG, "FocusAccessibilityService connected")
     }
 
     /**
-     * Rebuilds the accessibility service's watched-package filter to
-     * cover both the bundled known targets AND whatever the user has
-     * currently selected to block — so custom-blocked apps (added via
-     * App Blocker, not just the built-in Shorts/Reels list) actually
-     * generate events and can be intercepted. Passing null/empty
-     * currentlyBlocked still watches all KNOWN_TARGET_PACKAGES.
+     * Reads persisted session state from FlutterSharedPreferences and
+     * pushes it into the BlockDecisionEngine, so blocking is restored
+     * even if the accessibility service was killed and restarted by the OS.
      */
+    private fun restoreSessionState() {
+        try {
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val sessionActive = prefs.getBoolean(KEY_SESSION_ACTIVE, false)
+            if (!sessionActive) {
+                applyWatchedPackages(emptySet())
+                return
+            }
+
+            val strictMode = prefs.getBoolean(KEY_STRICT_MODE, false)
+            val studyMode = prefs.getBoolean(KEY_STUDY_MODE, false)
+
+            // Parse blocked apps list (stored as a JSON array string by Flutter)
+            val blockedAppsRaw = prefs.getString(KEY_BLOCKED_APPS, null)
+            val blockedPkgs = parseStringList(blockedAppsRaw)
+
+            val shortsBlockedRaw = prefs.getString(KEY_SHORTS_BLOCKED, null)
+            val shortsPkgs = parseStringList(shortsBlockedRaw)
+
+            val whitelistRaw = prefs.getString(KEY_WHITELIST, null)
+            val whitelist = parseStringList(whitelistRaw)
+
+            blockDecisionEngine.updateSessionState(
+                active = true,
+                blockedPkgs = blockedPkgs,
+                shortsBlockedPkgs = shortsPkgs,
+                strictMode = strictMode,
+                ytStudyMode = studyMode,
+                ytWhitelist = whitelist
+            )
+            applyWatchedPackages(blockedPkgs + shortsPkgs)
+            Log.i(TAG, "Restored session state: blocked=${blockedPkgs.size} shorts=${shortsPkgs.size} strict=$strictMode study=$studyMode")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restore session state", e)
+            applyWatchedPackages(emptySet())
+        }
+    }
+
+    /**
+     * Parses a Flutter SharedPreferences string list value.
+     * Flutter stores List<String> as either a JSON array string
+     * or via its own encoding — handles both formats.
+     */
+    private fun parseStringList(raw: String?): Set<String> {
+        if (raw.isNullOrBlank()) return emptySet()
+        // Flutter SharedPreferences can store lists as JSON arrays
+        return try {
+            val cleaned = raw.removePrefix("[").removeSuffix("]").trim()
+            if (cleaned.isEmpty()) return emptySet()
+            cleaned.split(",").map {
+                it.trim().removePrefix("\"").removeSuffix("\"")
+            }.filter { it.isNotEmpty() }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
     fun applyWatchedPackages(currentlyBlocked: Set<String>) {
         val watchSet = (KNOWN_TARGET_PACKAGES + currentlyBlocked).toTypedArray()
         serviceInfo = serviceInfo?.apply {
@@ -94,6 +151,9 @@ class FocusAccessibilityService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
         if (packageName == "com.focusforge.app") return
+
+        // Check if this package is temporarily unlocked (5-min grace period)
+        if (BlockOverlayService.isTemporarilyUnlocked(packageName)) return
 
         currentForegroundPackage = packageName
 
@@ -153,9 +213,6 @@ class FocusAccessibilityService : AccessibilityService() {
             ytStudyMode = ytStudyMode,
             ytWhitelist = ytWhitelist
         )
-        // Re-apply the watched-package filter so any newly blocked app
-        // (even one outside the bundled known-targets list) starts
-        // generating accessibility events immediately.
         applyWatchedPackages(blockedPkgs + shortsBlockedPkgs)
         Log.i(TAG, "Session state updated: active=$active blocked=${blockedPkgs.size} shortsBlocked=${shortsBlockedPkgs.size} strict=$strictMode ytStudy=$ytStudyMode")
     }

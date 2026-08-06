@@ -103,15 +103,19 @@ class SessionHistoryController extends StateNotifier<SessionHistoryState> {
   static const _goalKey = 'daily_focus_goal_minutes';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    final goal = prefs.getInt(_goalKey) ?? 120;
-    final records = raw == null
-        ? <FocusSessionRecord>[]
-        : (jsonDecode(raw) as List)
-            .map((e) => FocusSessionRecord.fromJson(e as Map<String, dynamic>))
-            .toList();
-    state = SessionHistoryState(records: records, dailyGoalMinutes: goal);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      final goal = prefs.getInt(_goalKey) ?? 120;
+      final records = raw == null
+          ? <FocusSessionRecord>[]
+          : (jsonDecode(raw) as List)
+              .map((e) => FocusSessionRecord.fromJson(e as Map<String, dynamic>))
+              .toList();
+      state = SessionHistoryState(records: records, dailyGoalMinutes: goal);
+    } catch (_) {
+      state = const SessionHistoryState();
+    }
   }
 
   Future<void> _persist() async {

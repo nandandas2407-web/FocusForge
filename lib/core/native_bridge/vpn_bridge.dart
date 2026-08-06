@@ -19,15 +19,21 @@ class VpnBridge {
   }
 
   Future<void> start() async {
-    await _channel.invokeMethod('startVpnService');
+    try {
+      await _channel.invokeMethod('startVpnService');
+    } catch (_) {}
   }
 
   Future<void> stop() async {
-    await _channel.invokeMethod('stopVpnService');
+    try {
+      await _channel.invokeMethod('stopVpnService');
+    } catch (_) {}
   }
 
   Future<void> setBlockedDomains(List<String> domains) async {
-    await _channel.invokeMethod('setBlockedDomains', {'domains': domains});
+    try {
+      await _channel.invokeMethod('setBlockedDomains', {'domains': domains});
+    } catch (_) {}
   }
 }
 

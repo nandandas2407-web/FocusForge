@@ -58,7 +58,9 @@ class UsageStatsBridge {
   }
 
   Future<void> openSettings() async {
-    await _channel.invokeMethod('openUsageStatsSettings');
+    try {
+      await _channel.invokeMethod('openUsageStatsSettings');
+    } catch (_) {}
   }
 
   /// Returns -1 when Usage Access hasn't been granted — callers must

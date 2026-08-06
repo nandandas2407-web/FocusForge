@@ -146,33 +146,4 @@ class LiquidGlassTheme {
       ),
     );
   }
-
-  static ThemeData get lightTheme {
-    return ThemeData(
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-      primaryColor: GlassTokens.accentPrimary,
-      colorScheme: ColorScheme.light(
-        primary: GlassTokens.accentPrimary,
-        secondary: GlassTokens.accentPrimaryLight,
-        surface: const Color(0xFFF5F5F5),
-        error: GlassTokens.danger,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: const Color(0xFF1A1A2E),
-        onError: Colors.white,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: TextStyle(
-          color: Color(0xFF1A1A2E),
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-        iconTheme: IconThemeData(color: Color(0xFF1A1A2E)),
-      ),
-    );
-  }
 }

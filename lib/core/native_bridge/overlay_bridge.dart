@@ -19,7 +19,9 @@ class OverlayBridge {
   }
 
   Future<void> openSettings() async {
-    await _channel.invokeMethod('openOverlaySettings');
+    try {
+      await _channel.invokeMethod('openOverlaySettings');
+    } catch (_) {}
   }
 }
 

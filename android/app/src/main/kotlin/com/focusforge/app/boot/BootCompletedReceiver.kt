@@ -1,19 +1,9 @@
 // ============================================================
 // FILE: android/.../boot/BootCompletedReceiver.kt
-// PURPOSE: Restarts blocking services after device reboot.
-//
-//          NOTE: This previously read a "focusforge_prefs" prefs
-//          file/keys ("session_active", "strict_mode") that nothing
-//          else in the app ever wrote — the Flutter side persists
-//          session state via the shared_preferences plugin, which
-//          uses a different backing file ("FlutterSharedPreferences")
-//          with "flutter." key prefixes. That meant this receiver's
-//          sessionActive check was always false in practice, and even
-//          when true it only launched a placeholder transient overlay
-//          with no package name — it never actually restarted the
-//          accessibility service's enforcement of the user's real
-//          block rules. Fixed to read the correct prefs file/keys.
-// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-04
+// PURPOSE: Restarts blocking services after device reboot by
+//          reading persisted session state from FlutterSharedPreferences
+//          and pushing it to the accessibility service.
+// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-06
 // ============================================================
 package com.focusforge.app.boot
 
@@ -21,11 +11,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.focusforge.app.accessibility.FocusAccessibilityService
 
 class BootCompletedReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "BootCompletedReceiver"
+        private const val PREFS_NAME = "FlutterSharedPreferences"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -34,16 +26,19 @@ class BootCompletedReceiver : BroadcastReceiver() {
         ) {
             Log.i(TAG, "Device booted — checking for an active FocusForge session")
 
-            // Matches the file/key naming shared_preferences (Flutter
-            // plugin) actually uses on Android.
-            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val sessionActive = prefs.getBoolean("flutter.rules_session_active", false)
 
             if (sessionActive) {
-                Log.i(TAG, "A focus session was active before reboot — the accessibility " +
-                        "service will re-apply block rules once Flutter re-launches and " +
-                        "calls updateSessionState(). No overlay is shown here since we don't " +
-                        "have a specific blocked package/reason without the app process running.")
+                Log.i(TAG, "A focus session was active before reboot — " +
+                        "the accessibility service will restore state when it connects.")
+
+                // The accessibility service reads from the same prefs file
+                // in restoreSessionState() when onServiceConnected() fires.
+                // No need to start it manually — Android will reconnect it
+                // if it was enabled before reboot. We just log for awareness.
+            } else {
+                Log.i(TAG, "No active session — nothing to restore")
             }
         }
     }

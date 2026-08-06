@@ -19,7 +19,9 @@ class AccessibilityBridge {
   }
 
   Future<void> openSettings() async {
-    await _channel.invokeMethod('openAccessibilitySettings');
+    try {
+      await _channel.invokeMethod('openAccessibilitySettings');
+    } catch (_) {}
   }
 }
 

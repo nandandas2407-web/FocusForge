@@ -225,7 +225,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: TableCalendar(
                 firstDay: DateTime(2020),
-                lastDay: DateTime(2030),
+                lastDay: DateTime(2050),
                 focusedDay: _focusedDay,
                 calendarFormat: _calendarFormat,
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),

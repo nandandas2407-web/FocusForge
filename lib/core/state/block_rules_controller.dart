@@ -101,34 +101,37 @@ class BlockRulesController extends StateNotifier<BlockRulesState> {
   static const _kBlocksTodayDate = 'rules_blocks_today_date';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    // Reset the daily counter if it's a new day.
-    final todayKey = DateTime.now().toIso8601String().substring(0, 10);
-    final savedDate = prefs.getString(_kBlocksTodayDate);
-    final blocksToday =
-        savedDate == todayKey ? (prefs.getInt(_kBlocksToday) ?? 0) : 0;
+      final todayKey = DateTime.now().toIso8601String().substring(0, 10);
+      final savedDate = prefs.getString(_kBlocksTodayDate);
+      final blocksToday =
+          savedDate == todayKey ? (prefs.getInt(_kBlocksToday) ?? 0) : 0;
 
-    final whitelist =
-        prefs.getStringList(_kWhitelist) ?? kDefaultStudyChannels;
+      final whitelist =
+          prefs.getStringList(_kWhitelist) ?? kDefaultStudyChannels;
 
-    // Seed defaults on first-ever load.
-    if (!prefs.containsKey(_kWhitelist)) {
-      await prefs.setStringList(_kWhitelist, kDefaultStudyChannels);
+      if (!prefs.containsKey(_kWhitelist)) {
+        await prefs.setStringList(_kWhitelist, kDefaultStudyChannels);
+      }
+
+      state = BlockRulesState(
+        blockedApps: (prefs.getStringList(_kBlockedApps) ?? []).toSet(),
+        blockedShortsApps:
+            (prefs.getStringList(_kBlockedShorts) ?? []).toSet(),
+        sessionActive: prefs.getBool(_kSessionActive) ?? false,
+        strictMode: prefs.getBool(_kStrictMode) ?? false,
+        youtubeStudyMode: prefs.getBool(_kStudyMode) ?? false,
+        youtubeWhitelist: whitelist,
+        blocksToday: blocksToday,
+      );
+
+      await _pushToNative();
+    } catch (_) {
+      // SharedPreferences corrupted — start with defaults
+      state = const BlockRulesState();
     }
-
-    state = BlockRulesState(
-      blockedApps: (prefs.getStringList(_kBlockedApps) ?? []).toSet(),
-      blockedShortsApps:
-          (prefs.getStringList(_kBlockedShorts) ?? []).toSet(),
-      sessionActive: prefs.getBool(_kSessionActive) ?? false,
-      strictMode: prefs.getBool(_kStrictMode) ?? false,
-      youtubeStudyMode: prefs.getBool(_kStudyMode) ?? false,
-      youtubeWhitelist: whitelist,
-      blocksToday: blocksToday,
-    );
-
-    await _pushToNative();
   }
 
   Future<void> _persist() async {

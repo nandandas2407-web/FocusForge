@@ -21,9 +21,7 @@ class AppDetectionRules {
     data class AppRule(
         val packageName: String,
         val blockAll: Boolean = false,
-        val subScreenBlocks: List<SubScreenRule> = emptyList(),
-        val youtubeWhitelistEnabled: Boolean = false,
-        val youtubeWhitelistedChannels: List<String> = emptyList()
+        val subScreenBlocks: List<SubScreenRule> = emptyList()
     )
 
     private var rules: Map<String, AppRule> = emptyMap()

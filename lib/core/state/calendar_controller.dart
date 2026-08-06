@@ -52,13 +52,17 @@ class CalendarController extends StateNotifier<List<CalendarEventRecord>> {
   static const _key = 'calendar_events_v1';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw == null) return;
-    final list = (jsonDecode(raw) as List)
-        .map((e) => CalendarEventRecord.fromJson(e as Map<String, dynamic>))
-        .toList();
-    state = list;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null) return;
+      final list = (jsonDecode(raw) as List)
+          .map((e) => CalendarEventRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
+      state = list;
+    } catch (_) {
+      state = [];
+    }
   }
 
   Future<void> _persist() async {

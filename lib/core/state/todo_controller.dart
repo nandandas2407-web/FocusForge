@@ -59,16 +59,20 @@ class TodoController extends StateNotifier<List<TodoTask>> {
   final _uuid = const Uuid();
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw == null) {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null) {
+        state = [];
+        return;
+      }
+      final list = (jsonDecode(raw) as List)
+          .map((e) => TodoTask.fromJson(e as Map<String, dynamic>))
+          .toList();
+      state = list;
+    } catch (_) {
       state = [];
-      return;
     }
-    final list = (jsonDecode(raw) as List)
-        .map((e) => TodoTask.fromJson(e as Map<String, dynamic>))
-        .toList();
-    state = list;
   }
 
   Future<void> _persist() async {

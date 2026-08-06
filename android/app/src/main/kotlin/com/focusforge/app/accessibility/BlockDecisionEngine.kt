@@ -198,14 +198,10 @@ class BlockDecisionEngine {
             )
         }
 
-        // Are we actually inside a video watch screen? Only the watch
-        // screen carries a channel_name node in the standard YouTube
-        // layout — home feed, search results, and the subscriptions
-        // grid legitimately do not, and must NOT be treated as "no
-        // channel detected, therefore block everything" (that was the
-        // previous bug: it made the whole app unusable in Study Mode,
-        // since even navigating TO a whitelisted channel got blocked
-        // before the channel name was resolvable).
+        // Check if we're on the home feed / recommendations shelf.
+        // In Study Mode, the home feed is blocked to prevent browsing
+        // distracting content. We detect the home feed by the presence
+        // of feed-specific view IDs and the absence of a player_view.
         val watchScreenMarkers = rootNode.findAccessibilityNodeInfosByViewId(
             "com.google.android.youtube:id/player_view"
         )
@@ -213,15 +209,57 @@ class BlockDecisionEngine {
         watchScreenMarkers.forEach { it.recycle() }
 
         if (!onWatchScreen) {
-            // Home feed, search, subscriptions, channel pages, etc.
-            // Recommendations on the home feed are visual noise but
-            // not separately actionable here without false-positiving
-            // on legitimate navigation — the actual distraction surface
-            // (Shorts + non-whitelisted video playback) is enforced at
-            // the watch screen, below.
+            // Check if this looks like the home feed / recommendations.
+            // The home feed has a feed rail or shelf structure but no
+            // video player. We allow channel pages and search since the
+            // user may be navigating TO a whitelisted channel.
+            val homeFeedMarkers = mutableListOf<AccessibilityNodeInfo>()
+
+            // YouTube home feed typically has these view IDs
+            val feedPatterns = listOf(
+                "home_feed",
+                "feed_entry",
+                "rich_grid",
+                "compact_video",
+                "video_with_context",
+                "thumbnail_overlay"
+            )
+
+            var looksLikeHomeFeed = false
+            for (pattern in feedPatterns) {
+                val nodes = rootNode.findAccessibilityNodeInfosByViewId(
+                    "com.google.android.youtube:id/$pattern"
+                )
+                if (nodes.isNotEmpty()) {
+                    looksLikeHomeFeed = true
+                    homeFeedMarkers.addAll(nodes)
+                }
+            }
+
+            // Also check for Shorts shelf on home feed
+            val shortsShelfNodes = rootNode.findAccessibilityNodeInfosByViewId(
+                "com.google.android.youtube:id/shorts_shelf"
+            )
+            if (shortsShelfNodes.isNotEmpty()) {
+                looksLikeHomeFeed = true
+                homeFeedMarkers.addAll(shortsShelfNodes)
+            }
+
+            homeFeedMarkers.forEach { it.recycle() }
+
+            if (looksLikeHomeFeed) {
+                return BlockDecision.BlockSubScreen(
+                    subScreenName = "home_feed",
+                    reason = "YouTube home feed is blocked in Study Mode — use search to find your study channels"
+                )
+            }
+
+            // Navigation screens (search, subscriptions, channel pages) are
+            // allowed so the user can find whitelisted content.
             return BlockDecision.Allow
         }
 
+        // We're on the video watch screen — check if the channel is whitelisted.
         val channelNodes = rootNode.findAccessibilityNodeInfosByViewId(
             "com.google.android.youtube:id/channel_name"
         )

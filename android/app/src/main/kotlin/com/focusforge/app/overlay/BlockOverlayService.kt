@@ -2,7 +2,7 @@
 // FILE: android/.../overlay/BlockOverlayService.kt
 // PURPOSE: Shows a full-screen overlay when an app is blocked,
 //          explaining why and providing optional unlock flow.
-// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-03
+// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-06
 // ============================================================
 package com.focusforge.app.overlay
 
@@ -25,6 +25,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import com.focusforge.app.MainActivity
 
 class BlockOverlayService : Service() {
 
@@ -32,11 +33,18 @@ class BlockOverlayService : Service() {
         private const val CHANNEL_ID = "focusforge_overlay"
         private const val NOTIFICATION_ID = 1001
         private const val OVERLAY_DISMISS_DELAY_MS = 3000L
-        private const val UNLOCK_GRACE_PERIOD_MS = 30_000L
+        private const val UNLOCK_GRACE_PERIOD_MS = 300_000L // 5 minutes
 
         private var overlayView: View? = null
         private var windowManager: WindowManager? = null
         private var dismissTimer: CountDownTimer? = null
+        private var unlockTimer: CountDownTimer? = null
+
+        /** Packages temporarily unlocked via the "Unlock for 5 min" button. */
+        private val temporarilyUnlocked = mutableSetOf<String>()
+
+        fun isTemporarilyUnlocked(packageName: String): Boolean =
+            temporarilyUnlocked.contains(packageName)
 
         fun show(
             context: Context,
@@ -67,6 +75,16 @@ class BlockOverlayService : Service() {
                 putExtra("overlay_type", "transient")
             }
             context.startForegroundService(intent)
+        }
+
+        fun removeOverlayStatic() {
+            dismissTimer?.cancel()
+            overlayView?.let { view ->
+                try {
+                    windowManager?.removeView(view)
+                } catch (_: Exception) {}
+            }
+            overlayView = null
         }
     }
 
@@ -218,28 +236,77 @@ class BlockOverlayService : Service() {
         card.addView(appText)
 
         if (!isStrictMode && overlayType != "transient") {
+            // Button row: Unlock + Remove Overlay side by side
+            val buttonRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+            }
+
+            // Unlock for 5 min button
             val unlockButton = Button(this).apply {
                 text = "Unlock for 5 min"
                 setTextColor(Color.WHITE)
-                textSize = 14f
+                textSize = 13f
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     setColor(Color.parseColor("#7C5CFF"))
                     cornerRadius = 16 * density
                 }
                 setPadding(
-                    (24 * density).toInt(),
+                    (20 * density).toInt(),
                     (12 * density).toInt(),
-                    (24 * density).toInt(),
+                    (20 * density).toInt(),
                     (12 * density).toInt()
                 )
                 setOnClickListener {
-                    // Emit unlock request to Flutter via MethodChannel
+                    // Temporarily unlock this package for 5 minutes
+                    temporarilyUnlocked.add(packageName)
+                    unlockTimer?.cancel()
+                    unlockTimer = object : CountDownTimer(UNLOCK_GRACE_PERIOD_MS, 1000) {
+                        override fun onTick(millisUntilFinished: Long) {}
+                        override fun onFinish() {
+                            temporarilyUnlocked.remove(packageName)
+                        }
+                    }.start()
                     removeOverlay()
                     stopSelf()
                 }
             }
-            card.addView(unlockButton)
+
+            // Remove overlay button (only dismisses overlay, blocking stays)
+            val removeButton = Button(this).apply {
+                text = "Dismiss"
+                setTextColor(Color.parseColor("#A7ACC0"))
+                textSize = 13f
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    setColor(Color.parseColor("#22FFFFFF"))
+                    cornerRadius = 16 * density
+                    setStroke((1 * density).toInt(), Color.parseColor("#40FFFFFF"))
+                }
+                setPadding(
+                    (20 * density).toInt(),
+                    (12 * density).toInt(),
+                    (20 * density).toInt(),
+                    (12 * density).toInt()
+                )
+                setOnClickListener {
+                    // Just remove the overlay — blocking stays active
+                    removeOverlay()
+                    stopSelf()
+                }
+            }
+
+            buttonRow.addView(unlockButton)
+            val spacer = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    (12 * density).toInt(),
+                    0
+                )
+            }
+            buttonRow.addView(spacer)
+            buttonRow.addView(removeButton)
+            card.addView(buttonRow)
         }
 
         if (isStrictMode) {
@@ -279,7 +346,7 @@ class BlockOverlayService : Service() {
     }
 
     private fun buildNotification(): Notification {
-        val intent = Intent(this, com.focusforge.app.MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

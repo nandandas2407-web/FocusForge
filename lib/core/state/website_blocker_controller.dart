@@ -44,20 +44,21 @@ class WebsiteBlockerController extends StateNotifier<WebsiteBlockerState> {
   static const _enforceAlwaysKey = 'website_enforce_always';
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_domainsKey);
-    final enforceAlways = prefs.getBool(_enforceAlwaysKey) ?? false;
-    // Real running status of the native VPN service, not a locally
-    // remembered guess — so the toggle reflects reality after a
-    // process restart (e.g. the OS killed the VPN service).
-    final vpnRunning = await _vpnBridge.isRunning();
-    state = WebsiteBlockerState(
-      blockedDomains: raw?.toSet() ?? {},
-      vpnEnabled: vpnRunning,
-      enforceAlways: enforceAlways,
-    );
-    if (state.blockedDomains.isNotEmpty) {
-      await _vpnBridge.setBlockedDomains(state.blockedDomains.toList());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_domainsKey);
+      final enforceAlways = prefs.getBool(_enforceAlwaysKey) ?? false;
+      final vpnRunning = await _vpnBridge.isRunning();
+      state = WebsiteBlockerState(
+        blockedDomains: raw?.toSet() ?? {},
+        vpnEnabled: vpnRunning,
+        enforceAlways: enforceAlways,
+      );
+      if (state.blockedDomains.isNotEmpty) {
+        await _vpnBridge.setBlockedDomains(state.blockedDomains.toList());
+      }
+    } catch (_) {
+      state = const WebsiteBlockerState();
     }
   }
 

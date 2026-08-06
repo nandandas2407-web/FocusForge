@@ -2,11 +2,13 @@
 // FILE: lib/features/focus_timer/presentation/focus_timer_screen.dart
 // PURPOSE: Pomodoro/Focus timer screen with wallpaper-behind-glass
 //          UI, ambient sound picker, and auto-blocking.
-// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-03
+//          Survives backgrounding via WidgetsBindingObserver.
+// CREATED: 2026-08-03 | LAST MODIFIED: 2026-08-06
 // ============================================================
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/glass_tokens.dart';
 import '../../../core/theme/wallpaper_controller.dart';
@@ -23,9 +25,9 @@ class FocusTimerScreen extends ConsumerStatefulWidget {
 }
 
 class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   Timer? _timer;
-  int _totalSeconds = 25 * 60; // 25 minutes default
+  int _totalSeconds = 25 * 60;
   int _remainingSeconds = 25 * 60;
   bool _isRunning = false;
   bool _isBreak = false;
@@ -38,30 +40,85 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
   String _selectedSound = 'None';
   final _sounds = ['None', 'Lo-fi', 'Rain', 'White Noise', 'Forest'];
 
-  /// Wall-clock time the current focus (non-break) phase began running,
-  /// used to log accurate elapsed time to session history regardless of
-  /// whether the phase ends via natural completion or a manual pause.
   DateTime? _focusPhaseStartedAt;
+
+  /// Timestamp when the timer was last ticked, used to compensate for
+  /// time spent in the background where Timer.periodic doesn't fire.
+  DateTime? _lastTickAt;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    // End session if it was active — prevents orphaned blocking.
+    if (_isRunning && !_isBreak) {
+      _logElapsedFocusTime();
+      ref.read(blockRulesProvider.notifier).endSession();
+    }
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_isRunning || _isBreak) return;
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        // App is going to background — record the current wall clock
+        // so we can compensate when it comes back.
+        _lastTickAt = DateTime.now();
+        _timer?.cancel();
+        break;
+      case AppLifecycleState.resumed:
+        // App came back to foreground — calculate how much time passed
+        // while in background and subtract it from remaining seconds.
+        if (_lastTickAt != null) {
+          final backgroundDuration =
+              DateTime.now().difference(_lastTickAt!).inSeconds;
+          _lastTickAt = null;
+          setState(() {
+            _remainingSeconds = (_remainingSeconds - backgroundDuration)
+                .clamp(0, _totalSeconds);
+          });
+          if (_remainingSeconds <= 0) {
+            _onTimerComplete();
+            return;
+          }
+        }
+        // Restart the periodic timer
+        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (_remainingSeconds > 0) {
+            setState(() => _remainingSeconds--);
+          } else {
+            _timer?.cancel();
+            _onTimerComplete();
+          }
+        });
+        break;
+      case AppLifecycleState.hidden:
+        break;
+    }
   }
 
   void _startTimer() {
     if (_isRunning) {
       _timer?.cancel();
       setState(() => _isRunning = false);
-      // Pausing the timer also lifts the block, so the user isn't
-      // locked out while the session is genuinely paused.
       if (!_isBreak) {
         ref.read(blockRulesProvider.notifier).endSession();
         _logElapsedFocusTime();
       }
     } else {
       _isRunning = true;
-      // A focus (non-break) phase is what actually enforces blocking.
+      _lastTickAt = null;
       if (!_isBreak) {
         ref.read(blockRulesProvider.notifier).startSession();
         _focusPhaseStartedAt = DateTime.now();
@@ -77,9 +134,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
     }
   }
 
-  /// Logs real elapsed seconds for the focus phase that just ended
-  /// (whether by completion or pause) to the persisted session history
-  /// that streaks/goals are computed from.
   void _logElapsedFocusTime() {
     final startedAt = _focusPhaseStartedAt;
     if (startedAt == null) return;
@@ -98,8 +152,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
         _remainingSeconds = _workMinutes * 60;
         _totalSeconds = _workMinutes * 60;
       } else {
-        // Focus phase just ended — lift the block for the break and
-        // log the completed duration to session history.
         ref.read(blockRulesProvider.notifier).endSession();
         _logElapsedFocusTime();
         if (_currentPomodoro < _totalPomodoros) {
@@ -202,7 +254,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Wallpaper background
           if (wallpaper.effectiveFocusWallpaper != null)
             Image.asset(
               'assets/images/default_wallpaper.jpg',
@@ -212,7 +263,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
           else
             _buildDefaultBackground(),
 
-          // Blur overlay
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
             child: Container(
@@ -220,11 +270,9 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
             ),
           ),
 
-          // Content
           SafeArea(
             child: Column(
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Row(
@@ -252,7 +300,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                   ),
                 ),
 
-                // Timer
                 Expanded(
                   child: Center(
                     child: GlassCard(
@@ -261,7 +308,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Pomodoro indicator
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(
@@ -281,7 +327,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                           ),
                           const SizedBox(height: 32),
 
-                          // Timer ring
                           SizedBox(
                             width: 200,
                             height: 200,
@@ -333,17 +378,14 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
 
                           const SizedBox(height: 32),
 
-                          // Controls
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Reset
                               _buildControlButton(
                                 icon: Icons.refresh,
                                 onTap: _resetTimer,
                               ),
                               const SizedBox(width: 24),
-                              // Play/Pause
                               GestureDetector(
                                 onTap: _startTimer,
                                 child: Container(
@@ -373,7 +415,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                                 ),
                               ),
                               const SizedBox(width: 24),
-                              // Skip
                               _buildControlButton(
                                 icon: Icons.skip_next,
                                 onTap: () {
@@ -389,7 +430,6 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                   ),
                 ),
 
-                // Sound picker
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: GlassCard(
