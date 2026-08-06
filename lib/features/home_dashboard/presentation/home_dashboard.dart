@@ -136,10 +136,10 @@ class _HomeDashboardState extends ConsumerState<HomeDashboard> {
                 color: GlassTokens.success.withValues(alpha: 0.3),
               ),
             ),
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.shield, size: 14, color: GlassTokens.success),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   'Focus active',
                   style: TextStyle(
@@ -177,7 +177,7 @@ class _HomeDashboardState extends ConsumerState<HomeDashboard> {
                     color: GlassTokens.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Permission needed',
                     style: TextStyle(
                       color: GlassTokens.warning,

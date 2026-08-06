@@ -245,7 +245,7 @@ class _AppBlockerScreenState extends ConsumerState<AppBlockerScreen> {
                   ),
                   Text(
                     app.packageName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: GlassTokens.textTertiary,
                       fontSize: 11,
                     ),

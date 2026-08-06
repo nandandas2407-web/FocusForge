@@ -27,9 +27,9 @@ const List<String> kDefaultStudyChannels = [
   'Knowledge Gate',
 
   // General competitive exam prep (India)
-  "Physics Wallah - Alakh Pandey",
+  'Physics Wallah - Alakh Pandey',
   'Unacademy',
-  "Khan Sir",
+  'Khan Sir',
 
   // Math / Science fundamentals
   '3Blue1Brown',

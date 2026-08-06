@@ -5,7 +5,6 @@
 //          setState — reset to the seed list every app restart.
 // CREATED: 2026-08-05 | LAST MODIFIED: 2026-08-05
 // ============================================================
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../native_bridge/vpn_bridge.dart';

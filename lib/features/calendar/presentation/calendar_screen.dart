@@ -197,9 +197,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           children: [
                             Text(
                               '${nextExam.date.difference(DateTime.now()).inDays + 1}',
-                              style: TextStyle(color: GlassTokens.danger, fontSize: 24, fontWeight: FontWeight.bold),
+                              style: const TextStyle(color: GlassTokens.danger, fontSize: 24, fontWeight: FontWeight.bold),
                             ),
-                            Text('days', style: TextStyle(color: GlassTokens.danger, fontSize: 10)),
+                            const Text('days', style: TextStyle(color: GlassTokens.danger, fontSize: 10)),
                           ],
                         ),
                       ),
@@ -261,7 +261,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
                   weekdayStyle: TextStyle(color: GlassTokens.textSecondary, fontSize: 12),
-                  weekendStyle: TextStyle(color: GlassTokens.textTertiary, fontSize: 12),
+                  weekendStyle: const TextStyle(color: GlassTokens.textTertiary, fontSize: 12),
                 ),
                 eventLoader: (day) {
                   return grouped[DateTime(day.year, day.month, day.day)] ?? [];

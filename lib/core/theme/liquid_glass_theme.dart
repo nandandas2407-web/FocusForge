@@ -134,7 +134,7 @@ class LiquidGlassTheme {
           color: GlassTokens.textSecondary,
           fontSize: 14,
         ),
-        bodySmall: TextStyle(
+        bodySmall: const TextStyle(
           color: GlassTokens.textTertiary,
           fontSize: 12,
         ),

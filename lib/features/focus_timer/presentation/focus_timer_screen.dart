@@ -522,7 +522,7 @@ class _FocusTimerScreenState extends ConsumerState<FocusTimerScreen>
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
+                const Text(
                   'Timer Settings',
                   style: TextStyle(
                     color: Colors.white,

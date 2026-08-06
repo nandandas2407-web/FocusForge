@@ -9,7 +9,6 @@
 //          in the UI actually change blocking behavior in real time.
 // CREATED: 2026-08-04 | LAST MODIFIED: 2026-08-04
 // ============================================================
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../native_bridge/session_bridge.dart';
@@ -110,7 +109,7 @@ class BlockRulesController extends StateNotifier<BlockRulesState> {
     final blocksToday =
         savedDate == todayKey ? (prefs.getInt(_kBlocksToday) ?? 0) : 0;
 
-    List<String> whitelist =
+    final whitelist =
         prefs.getStringList(_kWhitelist) ?? kDefaultStudyChannels;
 
     // Seed defaults on first-ever load.
