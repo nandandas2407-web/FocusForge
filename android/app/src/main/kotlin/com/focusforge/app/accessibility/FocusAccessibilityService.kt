@@ -101,7 +101,7 @@ class FocusAccessibilityService : AccessibilityService() {
                 shortsBlockedPkgs = shortsPkgs,
                 strictMode = strictMode,
                 ytStudyMode = studyMode,
-                ytWhitelist = whitelist
+                ytWhitelist = whitelist.toList()
             )
             applyWatchedPackages(blockedPkgs + shortsPkgs)
             Log.i(TAG, "Restored session state: blocked=${blockedPkgs.size} shorts=${shortsPkgs.size} strict=$strictMode study=$studyMode")
