@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FocusForge</string>
+    <string name="accessibility_service_description">FocusForge uses the Accessibility Service to detect which app is in the foreground. This allows FocusForge to block distracting apps and enforce your focus sessions. Accessibility data is processed entirely on-device and is never transmitted off your device.</string>
+    <string name="channel_block_overlay">Block Overlay</string>
+    <string name="channel_focus_session">Focus Session</string>
+    <string name="notification_focus_active">Focus session is active — stay focused!</string>
+    <string name="notification_break_reminder">Break time! Take a moment to recharge.</string>
+</resources>
