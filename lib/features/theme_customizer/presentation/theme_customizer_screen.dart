@@ -38,30 +38,10 @@ class _ThemeCustomizerScreenState extends ConsumerState<ThemeCustomizerScreen> {
   ];
 
   final _presets = {
-    'Midnight Glass': _PresetData(
-      Color(0xFF7C5CFF),
-      24.0,
-      0.14,
-      'Default dark glass',
-    ),
-    'Aurora': _PresetData(
-      Color(0xFF3DDC97),
-      28.0,
-      0.12,
-      'Green-tinted glass',
-    ),
-    'Frosted Light': _PresetData(
-      Color(0xFF60A5FA),
-      32.0,
-      0.10,
-      'Light and airy',
-    ),
-    'Sunset': _PresetData(
-      Color(0xFFFF5C7C),
-      20.0,
-      0.16,
-      'Warm rose glass',
-    ),
+    'Midnight Glass': const _PresetData(Color(0xFF7C5CFF), 24.0, 0.14, 'Default dark glass'),
+    'Aurora': const _PresetData(Color(0xFF3DDC97), 28.0, 0.12, 'Green-tinted glass'),
+    'Frosted Light': const _PresetData(Color(0xFF60A5FA), 32.0, 0.10, 'Light and airy'),
+    'Sunset': const _PresetData(Color(0xFFFF5C7C), 20.0, 0.16, 'Warm rose glass'),
   };
 
   @override
@@ -338,12 +318,9 @@ class _ThemeCustomizerScreenState extends ConsumerState<ThemeCustomizerScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'This is what your glass panels will look like with the current settings.',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
@@ -456,5 +433,5 @@ class _PresetData {
   final double opacity;
   final String description;
 
-  _PresetData(this.accentColor, this.blur, this.opacity, this.description);
+  const _PresetData(this.accentColor, this.blur, this.opacity, this.description);
 }

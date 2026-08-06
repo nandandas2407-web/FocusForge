@@ -288,7 +288,7 @@ class _YoutubeStudyModeScreenState
             ),
             IconButton(
               onPressed: () => notifier.removeWhitelistChannel(channel),
-              icon: Icon(
+              icon: const Icon(
                 Icons.remove_circle_outline,
                 color: GlassTokens.danger,
                 size: 20,

@@ -83,7 +83,7 @@ class _ShortsReelsBlockerScreenState
                       color: GlassTokens.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
+                    child: const Text(
                       '● Active',
                       style: TextStyle(
                         color: GlassTokens.success,
@@ -167,7 +167,7 @@ class _ShortsReelsBlockerScreenState
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.warning_amber_rounded,
+                      const Icon(Icons.warning_amber_rounded,
                           color: GlassTokens.warning, size: 20),
                       const SizedBox(width: 12),
                       Expanded(
@@ -279,7 +279,7 @@ class _ShortsReelsBlockerScreenState
                 if (value && blockedCount > 0)
                   Text(
                     '$blockedCount blocked today',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: GlassTokens.danger,
                       fontSize: 10,
                     ),

@@ -393,7 +393,7 @@ class _HomeDashboardState extends ConsumerState<HomeDashboard> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(Icons.check_circle_outline,
+                const Icon(Icons.check_circle_outline,
                     color: GlassTokens.success, size: 20),
                 const SizedBox(width: 12),
                 Text(

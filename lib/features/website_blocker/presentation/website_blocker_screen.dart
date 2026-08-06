@@ -184,7 +184,7 @@ class _WebsiteBlockerScreenState extends ConsumerState<WebsiteBlockerScreen> {
                     deleteIcon: const Icon(Icons.close, size: 16),
                     onDeleted: () => notifier.removeDomain(domain),
                     backgroundColor: GlassTokens.danger.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(color: GlassTokens.danger, fontSize: 13),
+                    labelStyle: const TextStyle(color: GlassTokens.danger, fontSize: 13),
                     side: BorderSide(color: GlassTokens.danger.withValues(alpha: 0.3)),
                   );
                 }).toList(),

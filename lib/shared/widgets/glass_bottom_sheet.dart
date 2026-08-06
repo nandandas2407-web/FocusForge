@@ -18,9 +18,9 @@ void showGlassBottomSheet({
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) => _GlassBottomSheetContent(
-      child: child,
       title: title,
       height: height,
+      child: child,
     ),
   );
 }

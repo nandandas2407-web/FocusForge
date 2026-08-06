@@ -198,7 +198,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
             IconButton(
               onPressed: () =>
                   ref.read(todoProvider.notifier).deleteTask(task.id),
-              icon: Icon(Icons.close, size: 16, color: GlassTokens.textTertiary),
+              icon: const Icon(Icons.close, size: 16, color: GlassTokens.textTertiary),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),

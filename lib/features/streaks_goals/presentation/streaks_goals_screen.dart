@@ -263,7 +263,7 @@ class StreaksGoalsScreen extends ConsumerWidget {
             if (achieved)
               Icon(Icons.check_circle, color: color, size: 20)
             else
-              Icon(Icons.lock_outline, color: GlassTokens.textTertiary, size: 20),
+              const Icon(Icons.lock_outline, color: GlassTokens.textTertiary, size: 20),
           ],
         ),
       ),
