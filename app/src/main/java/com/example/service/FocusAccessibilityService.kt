@@ -25,7 +25,7 @@ class FocusAccessibilityService : AccessibilityService() {
     private var reelsBlockedPackages = setOf<String>()
     private var shortsBlockedPackages = setOf<String>()
     private var isGlobalBlockerEnabled = true
-    private var isYoutubeStudyModeEnabled = true
+    private var isYoutubeStudyModeEnabled = false
     private var youtubeWhitelist = listOf<YoutubeWhitelistEntity>()
     private var websiteBlocks = listOf<WebsiteBlockEntity>()
 
@@ -81,7 +81,7 @@ class FocusAccessibilityService : AccessibilityService() {
         val rootNode = rootInActiveWindow
 
         if (packageName == "com.google.android.youtube") {
-            Log.d("FocusAccessibility", "YouTube event=${event.eventType} class=$className")
+            Log.d("FocusAccessibility", "YouTube event=${event.eventType} class=$className studyMode=$isYoutubeStudyModeEnabled")
         }
 
         val decision = AppDetectionRules.evaluate(
@@ -95,6 +95,15 @@ class FocusAccessibilityService : AccessibilityService() {
             youtubeWhitelist = youtubeWhitelist,
             websiteBlocks = websiteBlocks
         )
+
+        if (decision !is BlockDecision.Allow && packageName == "com.google.android.youtube") {
+            val reason = when (decision) {
+                is BlockDecision.BlockSubScreen -> decision.reason
+                is BlockDecision.BlockWholeApp -> decision.reason
+                else -> ""
+            }
+            Log.w("FocusAccessibility", "YouTube BLOCKED: $reason")
+        }
 
         val pm = applicationContext.packageManager
         val appName = try {
