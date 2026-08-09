@@ -1,6 +1,4 @@
 {
   "name": "FocusForge",
-  "description": "Focus & Study Suite with Liquid Glass dark UI, Reels/Shorts Blocker, Pomodoro, Tasks & Calendar.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "description": "Focus & Study Suite with Liquid Glass dark UI, Reels/Shorts Blocker, Pomodoro, Tasks & Calendar."
 }

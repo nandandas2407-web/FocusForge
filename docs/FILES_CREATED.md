@@ -4,7 +4,7 @@ Every file created in the codebase is indexed below with its structural layer, p
 
 | File Path | Layer | Purpose | Status |
 |---|---|---|---|
-| `metadata.json` | Platform | AI Studio project identity (FocusForge) | ✅ |
+| `metadata.json` | Platform | Project identity (FocusForge) | ✅ |
 | `settings.gradle.kts` | Build | Gradle root project configuration | ✅ |
 | `app/build.gradle.kts` | Build | App module dependencies & Room/KSP plugins | ✅ |
 | `app/src/main/res/values/strings.xml` | Resources | Application string resources (`FocusForge`) | ✅ |
