@@ -1,8 +1,8 @@
 // ============================================================
 // FILE: app/src/main/java/com/example/ui/theme/GlassComponents.kt
-// PURPOSE: Reusable Liquid Glass UI components (GlassCard, GlassButton, GlassBottomNav,
-//          GlassTextField, GlassChip, GlassRingProgress).
+// PURPOSE: Minimal green UI components — flat surfaces, clean geometry, no excess.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — Brutal minimalism overhaul.
 // ============================================================
 
 package com.example.ui.theme
@@ -18,15 +18,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -34,49 +33,36 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// ── Card ──────────────────────────────────────────────────────────────
+
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 24.dp,
-    opacity: Float = 0.14f,
+    cornerRadius: Dp = 16.dp,
+    opacity: Float = 0.06f,
     borderColor: Color = GlassTokens.SpecularBorderStart,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
-    val clickableModifier = if (onClick != null) {
-        Modifier.clickable { onClick() }
-    } else Modifier
+    val clickableModifier = if (onClick != null) Modifier.clickable { onClick() } else Modifier
 
     Column(
         modifier = modifier
-            .shadow(elevation = 12.dp, shape = shape, spotColor = Color.Black.copy(alpha = 0.5f))
             .clip(shape)
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = opacity + 0.06f),
-                        Color.White.copy(alpha = opacity)
-                    )
-                )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(borderColor, Color.White.copy(alpha = 0.03f))
-                ),
-                shape = shape
-            )
+            .background(GlassTokens.SurfaceDark.copy(alpha = 0.8f))
+            .border(1.dp, borderColor, shape)
             .then(clickableModifier)
-            .padding(20.dp),
+            .padding(16.dp),
         content = content
     )
 }
+
+// ── Button ────────────────────────────────────────────────────────────
 
 @Composable
 fun GlassButton(
@@ -84,11 +70,11 @@ fun GlassButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    accentColor: Color = GlassTokens.ElectricViolet,
+    accentColor: Color = GlassTokens.Accent,
     enabled: Boolean = true,
     testTagStr: String = "glass_button"
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(12.dp)
     Surface(
         modifier = modifier
             .testTag(testTagStr)
@@ -99,18 +85,10 @@ fun GlassButton(
         Box(
             modifier = Modifier
                 .background(
-                    brush = Brush.horizontalGradient(
-                        colors = if (enabled) listOf(accentColor, accentColor.copy(alpha = 0.75f))
-                        else listOf(Color.Gray.copy(alpha = 0.3f), Color.Gray.copy(alpha = 0.2f))
-                    ),
+                    color = if (enabled) accentColor else Color.Gray.copy(alpha = 0.25f),
                     shape = shape
                 )
-                .border(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.3f),
-                    shape = shape
-                )
-                .padding(horizontal = 24.dp, vertical = 14.dp),
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -121,21 +99,23 @@ fun GlassButton(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = GlassTokens.TextPrimary,
-                        modifier = Modifier.size(20.dp)
+                        tint = if (enabled) GlassTokens.DarkBase else GlassTokens.TextMuted,
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 Text(
                     text = text,
-                    color = GlassTokens.TextPrimary,
-                    fontSize = 16.sp,
+                    color = if (enabled) GlassTokens.DarkBase else GlassTokens.TextMuted,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
         }
     }
 }
+
+// ── Text Field ────────────────────────────────────────────────────────
 
 @Composable
 fun GlassTextField(
@@ -146,25 +126,25 @@ fun GlassTextField(
     leadingIcon: ImageVector? = Icons.Default.Search,
     testTagStr: String = "glass_input"
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(12.dp)
     Box(
         modifier = modifier
             .testTag(testTagStr)
             .fillMaxWidth()
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.1f))
-            .border(1.dp, Color.White.copy(alpha = 0.2f), shape)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .background(GlassTokens.SurfaceDark)
+            .border(1.dp, GlassTokens.SpecularBorderStart, shape)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (leadingIcon != null) {
                 Icon(
                     imageVector = leadingIcon,
-                    contentDescription = "Search",
-                    tint = GlassTokens.TextSecondary,
-                    modifier = Modifier.size(20.dp)
+                    contentDescription = null,
+                    tint = GlassTokens.TextMuted,
+                    modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
             }
             TextField(
                 value = value,
@@ -185,9 +165,9 @@ fun GlassTextField(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Clear",
-                    tint = GlassTokens.TextSecondary,
+                    tint = GlassTokens.TextMuted,
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(18.dp)
                         .clickable { onValueChange("") }
                 )
             }
@@ -195,39 +175,43 @@ fun GlassTextField(
     }
 }
 
+// ── Chip ──────────────────────────────────────────────────────────────
+
 @Composable
 fun GlassChip(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    accentColor: Color = GlassTokens.ElectricViolet
+    accentColor: Color = GlassTokens.Accent
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(8.dp)
     Box(
         modifier = modifier
             .clip(shape)
             .background(
-                if (isSelected) accentColor.copy(alpha = 0.4f)
-                else Color.White.copy(alpha = 0.08f)
+                if (isSelected) accentColor.copy(alpha = 0.15f)
+                else GlassTokens.SurfaceDark
             )
             .border(
                 1.dp,
-                if (isSelected) accentColor else Color.White.copy(alpha = 0.15f),
+                if (isSelected) accentColor.copy(alpha = 0.5f) else GlassTokens.SpecularBorderStart,
                 shape
             )
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = if (isSelected) GlassTokens.TextPrimary else GlassTokens.TextSecondary,
-            fontSize = 13.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+            color = if (isSelected) accentColor else GlassTokens.TextSecondary,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
         )
     }
 }
+
+// ── Ring Progress ─────────────────────────────────────────────────────
 
 @Composable
 fun GlassRingProgress(
@@ -235,7 +219,7 @@ fun GlassRingProgress(
     timeText: String,
     statusText: String,
     modifier: Modifier = Modifier,
-    accentColor: Color = GlassTokens.ElectricViolet
+    accentColor: Color = GlassTokens.Accent
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -243,27 +227,25 @@ fun GlassRingProgress(
     )
 
     Box(
-        modifier = modifier.size(260.dp),
+        modifier = modifier.size(220.dp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 18.dp.toPx()
+            val strokeWidth = 8.dp.toPx()
             val radius = (size.minDimension - strokeWidth) / 2
             val center = Offset(size.width / 2, size.height / 2)
 
-            // Background glass arc
+            // Background track
             drawCircle(
-                color = Color.White.copy(alpha = 0.12f),
+                color = Color.White.copy(alpha = 0.06f),
                 radius = radius,
                 center = center,
                 style = Stroke(width = strokeWidth)
             )
 
-            // Active progress arc
+            // Progress arc
             drawArc(
-                brush = Brush.sweepGradient(
-                    colors = listOf(accentColor, GlassTokens.NeonCyan, accentColor)
-                ),
+                color = accentColor,
                 startAngle = -90f,
                 sweepAngle = 360f * animatedProgress,
                 useCenter = false,
@@ -274,20 +256,23 @@ fun GlassRingProgress(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = timeText,
-                fontSize = 42.sp,
+                fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = GlassTokens.TextPrimary
+                color = GlassTokens.TextPrimary,
+                letterSpacing = (-1).sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = statusText,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 color = GlassTokens.TextSecondary,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Normal
             )
         }
     }
 }
+
+// ── Navigation ────────────────────────────────────────────────────────
 
 data class NavigationItem(
     val route: String,
@@ -302,23 +287,16 @@ fun GlassBottomNav(
     onNavigate: (String) -> Unit,
     items: List<NavigationItem>,
     modifier: Modifier = Modifier,
-    accentColor: Color = GlassTokens.ElectricViolet
+    accentColor: Color = GlassTokens.Accent
 ) {
-    val shape = RoundedCornerShape(28.dp)
+    val shape = RoundedCornerShape(0.dp)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .shadow(16.dp, shape, spotColor = Color.Black.copy(alpha = 0.6f))
-            .clip(shape)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.18f), Color.White.copy(alpha = 0.08f))
-                )
-            )
-            .border(1.dp, Color.White.copy(alpha = 0.25f), shape)
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .background(GlassTokens.SurfaceDark)
+            .border(1.dp, GlassTokens.SpecularBorderStart, shape)
+            .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -327,32 +305,32 @@ fun GlassBottomNav(
         ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
-                val pillShape = CircleShape
 
                 Box(
                     modifier = Modifier
                         .testTag("nav_${item.route}")
-                        .clip(pillShape)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(
-                            if (isSelected) accentColor.copy(alpha = 0.35f)
+                            if (isSelected) accentColor.copy(alpha = 0.12f)
                             else Color.Transparent
                         )
                         .clickable { onNavigate(item.route) }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = if (isSelected) item.selectedIcon else item.icon,
                             contentDescription = item.title,
-                            tint = if (isSelected) GlassTokens.TextPrimary else GlassTokens.TextMuted,
-                            modifier = Modifier.size(22.dp)
+                            tint = if (isSelected) accentColor else GlassTokens.TextMuted,
+                            modifier = Modifier.size(20.dp)
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = item.title,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) GlassTokens.TextPrimary else GlassTokens.TextMuted
+                            fontSize = 10.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) accentColor else GlassTokens.TextMuted
                         )
                     }
                 }
@@ -367,60 +345,51 @@ fun GlassNavRail(
     onNavigate: (String) -> Unit,
     items: List<NavigationItem>,
     modifier: Modifier = Modifier,
-    accentColor: Color = GlassTokens.ElectricViolet
+    accentColor: Color = GlassTokens.Accent
 ) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(0.dp)
 
     Box(
         modifier = modifier
-            .width(88.dp)
+            .width(72.dp)
             .fillMaxHeight()
-            .padding(12.dp)
-            .shadow(16.dp, shape, spotColor = Color.Black.copy(alpha = 0.6f))
-            .clip(shape)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.18f), Color.White.copy(alpha = 0.08f))
-                )
-            )
-            .border(1.dp, Color.White.copy(alpha = 0.25f), shape)
-            .padding(vertical = 16.dp)
+            .background(GlassTokens.SurfaceDark)
+            .border(1.dp, GlassTokens.SpecularBorderStart, shape)
+            .padding(vertical = 12.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
-                val pillShape = CircleShape
 
                 Box(
                     modifier = Modifier
                         .testTag("nav_rail_${item.route}")
-                        .clip(pillShape)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(
-                            if (isSelected) accentColor.copy(alpha = 0.35f)
+                            if (isSelected) accentColor.copy(alpha = 0.12f)
                             else Color.Transparent
                         )
                         .clickable { onNavigate(item.route) }
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 8.dp, vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = if (isSelected) item.selectedIcon else item.icon,
                             contentDescription = item.title,
-                            tint = if (isSelected) GlassTokens.TextPrimary else GlassTokens.TextMuted,
-                            modifier = Modifier.size(24.dp)
+                            tint = if (isSelected) accentColor else GlassTokens.TextMuted,
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = item.title,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) GlassTokens.TextPrimary else GlassTokens.TextMuted,
-                            textAlign = TextAlign.Center
+                            fontSize = 9.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) accentColor else GlassTokens.TextMuted
                         )
                     }
                 }
@@ -428,4 +397,3 @@ fun GlassNavRail(
         }
     }
 }
-

@@ -58,7 +58,7 @@ fun ShortsReelsBlockerScreen(
                         Icon(
                             imageVector = Icons.Default.MovieFilter,
                             contentDescription = null,
-                            tint = GlassTokens.NeonCyan,
+                            tint = GlassTokens.Info,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -97,7 +97,7 @@ fun ShortsReelsBlockerScreen(
                                 Icon(
                                     imageVector = Icons.Default.VideoLibrary,
                                     contentDescription = null,
-                                    tint = GlassTokens.ElectricViolet,
+                                    tint = GlassTokens.Accent,
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -122,8 +122,8 @@ fun ShortsReelsBlockerScreen(
                                     onToggleReelsBlocked("com.instagram.android", "Instagram", checked)
                                 },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = GlassTokens.ElectricViolet,
-                                    checkedTrackColor = GlassTokens.ElectricViolet.copy(alpha = 0.3f)
+                                    checkedThumbColor = GlassTokens.Accent,
+                                    checkedTrackColor = GlassTokens.Accent.copy(alpha = 0.3f)
                                 )
                             )
                         }
@@ -132,7 +132,7 @@ fun ShortsReelsBlockerScreen(
                             text = if (reelsBlockedCount > 0) "$reelsBlockedCount Reels loops intercepted today" else "0 Reels attempts blocked today",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = GlassTokens.VibrantGreen
+                            color = GlassTokens.Success
                         )
                     }
                 }
@@ -156,7 +156,7 @@ fun ShortsReelsBlockerScreen(
                                 Icon(
                                     imageVector = Icons.Default.Block,
                                     contentDescription = null,
-                                    tint = GlassTokens.SoftRed,
+                                    tint = GlassTokens.Danger,
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -181,8 +181,8 @@ fun ShortsReelsBlockerScreen(
                                     onToggleShortsBlocked("com.google.android.youtube", "YouTube", checked)
                                 },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = GlassTokens.SoftRed,
-                                    checkedTrackColor = GlassTokens.SoftRed.copy(alpha = 0.3f)
+                                    checkedThumbColor = GlassTokens.Danger,
+                                    checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
                                 )
                             )
                         }
@@ -191,7 +191,7 @@ fun ShortsReelsBlockerScreen(
                             text = if (shortsBlockedCount > 0) "$shortsBlockedCount Shorts attempts blocked today" else "0 Shorts attempts blocked today",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = GlassTokens.VibrantGreen
+                            color = GlassTokens.Success
                         )
                     }
                 }

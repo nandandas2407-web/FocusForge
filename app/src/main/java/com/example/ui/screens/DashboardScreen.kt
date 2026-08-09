@@ -102,8 +102,8 @@ fun DashboardScreen(
                         // Streak Flame Badge
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = GlassTokens.WarmGold.copy(alpha = 0.2f),
-                            modifier = Modifier.border(1.dp, GlassTokens.WarmGold, RoundedCornerShape(20.dp))
+                            color = GlassTokens.Warning.copy(alpha = 0.2f),
+                            modifier = Modifier.border(1.dp, GlassTokens.Warning, RoundedCornerShape(20.dp))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -112,7 +112,7 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Default.LocalFireDepartment,
                                     contentDescription = "Streak",
-                                    tint = GlassTokens.WarmGold,
+                                    tint = GlassTokens.Warning,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -120,7 +120,7 @@ fun DashboardScreen(
                                     text = "$streakDays Day Streak",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = GlassTokens.WarmGold
+                                    color = GlassTokens.Warning
                                 )
                             }
                         }
@@ -154,14 +154,14 @@ fun DashboardScreen(
                                     Icon(
                                         imageVector = Icons.Default.Timer,
                                         contentDescription = null,
-                                        tint = GlassTokens.VibrantGreen,
+                                        tint = GlassTokens.Success,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "$todayFocusMinutes mins focused today",
                                         fontSize = 12.sp,
-                                        color = GlassTokens.VibrantGreen,
+                                        color = GlassTokens.Success,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -172,7 +172,7 @@ fun DashboardScreen(
                                 CircularProgressIndicator(
                                     progress = { progressFraction },
                                     modifier = Modifier.fillMaxSize(),
-                                    color = GlassTokens.ElectricViolet,
+                                    color = GlassTokens.Accent,
                                     trackColor = Color.White.copy(alpha = 0.15f),
                                     strokeWidth = 10.dp
                                 )
@@ -222,7 +222,7 @@ fun DashboardScreen(
                             ActionChip(
                                 title = "App Blocker",
                                 icon = Icons.Default.Block,
-                                accent = GlassTokens.ElectricViolet,
+                                accent = GlassTokens.Accent,
                                 onClick = onNavigateToBlocker,
                                 testTagStr = "chip_app_blocker"
                             )
@@ -231,7 +231,7 @@ fun DashboardScreen(
                             ActionChip(
                                 title = "Reels & Shorts",
                                 icon = Icons.Default.MovieFilter,
-                                accent = GlassTokens.NeonCyan,
+                                accent = GlassTokens.Info,
                                 onClick = onNavigateToShorts,
                                 testTagStr = "chip_reels_shorts"
                             )
@@ -240,7 +240,7 @@ fun DashboardScreen(
                             ActionChip(
                                 title = "Study YouTube",
                                 icon = Icons.Default.School,
-                                accent = GlassTokens.WarmGold,
+                                accent = GlassTokens.Warning,
                                 onClick = onNavigateToYoutube,
                                 testTagStr = "chip_study_youtube"
                             )
@@ -249,7 +249,7 @@ fun DashboardScreen(
                             ActionChip(
                                 title = "Add Task",
                                 icon = Icons.Default.Add,
-                                accent = GlassTokens.VibrantGreen,
+                                accent = GlassTokens.Success,
                                 onClick = onNavigateToTasks,
                                 testTagStr = "chip_add_task"
                             )
@@ -273,7 +273,7 @@ fun DashboardScreen(
                         Text(
                             text = "View All",
                             fontSize = 13.sp,
-                            color = GlassTokens.ElectricViolet,
+                            color = GlassTokens.Accent,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.clickable { onNavigateToTasks() }
                         )
@@ -298,7 +298,7 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = if (task.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                     contentDescription = null,
-                                    tint = if (task.isCompleted) GlassTokens.VibrantGreen else GlassTokens.TextSecondary,
+                                    tint = if (task.isCompleted) GlassTokens.Success else GlassTokens.TextSecondary,
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -320,13 +320,13 @@ fun DashboardScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = GlassTokens.ElectricViolet.copy(alpha = 0.2f)
+                                    color = GlassTokens.Accent.copy(alpha = 0.2f)
                                 ) {
                                     Text(
                                         text = task.priority,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = GlassTokens.ElectricViolet,
+                                        color = GlassTokens.Accent,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }

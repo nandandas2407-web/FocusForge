@@ -45,7 +45,7 @@ fun OnboardingScreen(
                             Icon(
                                 imageVector = Icons.Default.Shield,
                                 contentDescription = null,
-                                tint = GlassTokens.NeonCyan,
+                                tint = GlassTokens.Info,
                                 modifier = Modifier.size(64.dp)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
@@ -157,7 +157,7 @@ private fun PermissionItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = GlassTokens.ElectricViolet,
+                tint = GlassTokens.Accent,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -177,7 +177,7 @@ private fun PermissionItem(
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.ElectricViolet),
+                colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Enable", fontSize = 12.sp)

@@ -1,8 +1,8 @@
 // ============================================================
 // FILE: app/src/main/java/com/example/service/BlockOverlayService.kt
-// PURPOSE: Foreground Service displaying system overlay window and alert notification
-//          when apps or Reels/Shorts are blocked in Focus Mode.
+// PURPOSE: Foreground Service displaying minimal green overlay when content is blocked.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — Brutal minimalism overhaul.
 // ============================================================
 
 package com.example.service
@@ -52,10 +52,10 @@ class BlockOverlayService : Service() {
         val reason = intent?.getStringExtra("REASON") ?: "Focus Mode is Active"
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("FocusForge Protection")
-            .setContentText("Blocked access to $appName")
+            .setContentTitle("FocusForge")
+            .setContentText("Blocked $appName")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(Notification.CATEGORY_STATUS)
             .setAutoCancel(true)
             .build()
@@ -70,97 +70,98 @@ class BlockOverlayService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
 
-        // Show Window Overlay if overlay permission is granted
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)) {
-            showSystemOverlay(packageName, appName, reason)
+            showOverlay(packageName, appName, reason)
         }
 
         return START_NOT_STICKY
     }
 
-    private fun showSystemOverlay(pkgName: String, appName: String, reason: String) {
-        removeOverlayView()
+    private fun showOverlay(pkgName: String, appName: String, reason: String) {
+        removeOverlay()
 
-        val context = this
-        val dpToPx = { dp: Int ->
+        val ctx = this
+        val px = { dp: Int ->
             TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dp.toFloat(),
-                resources.displayMetrics
+                TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), resources.displayMetrics
             ).toInt()
         }
 
-        // Parent container card
-        val cardLayout = LinearLayout(context).apply {
+        val card = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(20))
+            setPadding(px(20), px(20), px(20), px(20))
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#1E293B")) // Slate 800
-                cornerRadius = dpToPx(16).toFloat()
-                setStroke(dpToPx(1), Color.parseColor("#33FFFFFF"))
+                setColor(Color.parseColor("#111916"))
+                cornerRadius = px(12).toFloat()
+                setStroke(px(1), Color.parseColor("#14FFFFFF"))
             }
         }
 
-        // Header
-        val headerTv = TextView(context).apply {
-            text = "🛡️ FocusForge Protection"
-            setTextColor(Color.parseColor("#F8FAFC"))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        // Green dot indicator
+        val dot = View(ctx).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor("#22C55E"))
+            }
+            layoutParams = LinearLayout.LayoutParams(px(8), px(8))
+        }
+        card.addView(dot)
+
+        // Title
+        val title = TextView(ctx).apply {
+            text = appName
+            setTextColor(Color.parseColor("#E8F0EA"))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, px(8), 0, px(4))
         }
-        cardLayout.addView(headerTv)
+        card.addView(title)
 
-        // Body message
-        val bodyTv = TextView(context).apply {
-            text = "You have blocked $appName.\n$reason"
-            setTextColor(Color.parseColor("#94A3B8"))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-            setPadding(0, dpToPx(8), 0, dpToPx(16))
+        // Reason
+        val body = TextView(ctx).apply {
+            text = reason
+            setTextColor(Color.parseColor("#8A9B8E"))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setPadding(0, 0, 0, px(16))
         }
-        cardLayout.addView(bodyTv)
+        card.addView(body)
 
-        // Button row
-        val btnRow = LinearLayout(context).apply {
+        // Buttons
+        val btnRow = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END
         }
 
-        // Dismiss Button
-        val dismissBtn = Button(context).apply {
-            text = "Dismiss"
-            setTextColor(Color.parseColor("#94A3B8"))
+        val dismissBtn = Button(ctx).apply {
+            text = "Go Home"
+            setTextColor(Color.parseColor("#8A9B8E"))
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#334155"))
-                cornerRadius = dpToPx(8).toFloat()
+                setColor(Color.parseColor("#182019"))
+                cornerRadius = px(8).toFloat()
             }
             setOnClickListener {
-                val homeIntent = Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_HOME)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
                 try {
-                    context.startActivity(homeIntent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                removeOverlayView()
+                    ctx.startActivity(Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_HOME)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                } catch (_: Exception) {}
+                removeOverlay()
                 stopSelf()
             }
         }
 
-        // Turn Off Block Button
-        val unblockBtn = Button(context).apply {
-            text = "Turn Off Block"
-            setTextColor(Color.WHITE)
+        val unblockBtn = Button(ctx).apply {
+            text = "Allow"
+            setTextColor(Color.parseColor("#0A0F0D"))
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#6366F1")) // Indigo
-                cornerRadius = dpToPx(8).toFloat()
+                setColor(Color.parseColor("#22C55E"))
+                cornerRadius = px(8).toFloat()
             }
             setOnClickListener {
-                // Update Room Database to unblock app
                 serviceScope.launch {
                     try {
-                        val dao = FocusDatabase.getDatabase(context).focusDao()
+                        val dao = FocusDatabase.getDatabase(ctx).focusDao()
                         dao.insertBlockedApp(
                             BlockedAppEntity(
                                 packageName = pkgName,
@@ -170,86 +171,66 @@ class BlockOverlayService : Service() {
                                 isShortsBlocked = false
                             )
                         )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    } catch (_: Exception) {}
                 }
-                removeOverlayView()
+                removeOverlay()
                 stopSelf()
             }
         }
 
-        val btnParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            setMargins(dpToPx(8), 0, 0, 0)
-        }
-
         btnRow.addView(dismissBtn, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         ))
-        btnRow.addView(unblockBtn, btnParams)
-        cardLayout.addView(btnRow)
+        btnRow.addView(unblockBtn, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { setMargins(px(8), 0, 0, 0) })
+        card.addView(btnRow)
 
         val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         } else {
-            @Suppress("DEPRECATION")
-            WindowManager.LayoutParams.TYPE_PHONE
+            @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
         }
 
         val params = WindowManager.LayoutParams(
-            dpToPx(340),
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            px(300), WindowManager.LayoutParams.WRAP_CONTENT,
             layoutType,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.CENTER
-        }
+        ).apply { gravity = Gravity.CENTER }
 
         try {
-            windowManager?.addView(cardLayout, params)
-            overlayView = cardLayout
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            windowManager?.addView(card, params)
+            overlayView = card
+        } catch (_: Exception) {}
     }
 
-    private fun removeOverlayView() {
-        overlayView?.let { view ->
-            try {
-                windowManager?.removeView(view)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    private fun removeOverlay() {
+        overlayView?.let {
+            try { windowManager?.removeView(it) } catch (_: Exception) {}
             overlayView = null
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        removeOverlayView()
+        removeOverlay()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID,
-                "FocusForge Protection Service",
-                NotificationManager.IMPORTANCE_HIGH
+                CHANNEL_ID, "FocusForge",
+                NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
-        const val CHANNEL_ID = "focus_forge_overlay_channel"
+        const val CHANNEL_ID = "focusforge_overlay"
         const val NOTIFICATION_ID = 1001
     }
 }

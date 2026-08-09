@@ -75,7 +75,7 @@ fun AppBlockerScreen(
                     Icon(
                         imageVector = Icons.Default.Apps,
                         contentDescription = null,
-                        tint = GlassTokens.ElectricViolet,
+                        tint = GlassTokens.Accent,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -147,7 +147,7 @@ fun AppBlockerScreen(
                             Text(
                                 text = "${app.category} • ${if (isBlocked) "Locked in Focus Mode" else "Allowed"}",
                                 fontSize = 12.sp,
-                                color = if (isBlocked) GlassTokens.SoftRed else GlassTokens.TextSecondary
+                                color = if (isBlocked) GlassTokens.Danger else GlassTokens.TextSecondary
                             )
                         }
 
@@ -164,8 +164,8 @@ fun AppBlockerScreen(
                                 )
                             },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GlassTokens.SoftRed,
-                                checkedTrackColor = GlassTokens.SoftRed.copy(alpha = 0.3f)
+                                checkedThumbColor = GlassTokens.Danger,
+                                checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
                             )
                         )
                     }

@@ -68,7 +68,7 @@ fun TodoListScreen(
 
                         FloatingActionButton(
                             onClick = { showAddModal = true },
-                            containerColor = GlassTokens.ElectricViolet,
+                            containerColor = GlassTokens.Accent,
                             contentColor = GlassTokens.TextPrimary,
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier.testTag("fab_add_task")
@@ -93,7 +93,7 @@ fun TodoListScreen(
                                 Icon(
                                     imageVector = if (task.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                     contentDescription = "Toggle Complete",
-                                    tint = if (task.isCompleted) GlassTokens.VibrantGreen else GlassTokens.TextSecondary
+                                    tint = if (task.isCompleted) GlassTokens.Success else GlassTokens.TextSecondary
                                 )
                             }
 
@@ -120,15 +120,15 @@ fun TodoListScreen(
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = when (task.priority) {
-                                            "HIGH" -> GlassTokens.SoftRed
-                                            "LOW" -> GlassTokens.VibrantGreen
-                                            else -> GlassTokens.WarmGold
+                                            "HIGH" -> GlassTokens.Danger
+                                            "LOW" -> GlassTokens.Success
+                                            else -> GlassTokens.Warning
                                         }
                                     )
                                     Text(
                                         text = "Est: ${task.estimatedMinutes}m",
                                         fontSize = 10.sp,
-                                        color = GlassTokens.NeonCyan
+                                        color = GlassTokens.Info
                                     )
                                 }
                             }
@@ -137,7 +137,7 @@ fun TodoListScreen(
                                 Icon(
                                     imageVector = Icons.Default.PlayCircle,
                                     contentDescription = "Focus Task",
-                                    tint = GlassTokens.NeonCyan
+                                    tint = GlassTokens.Info
                                 )
                             }
 
@@ -167,7 +167,7 @@ fun TodoListScreen(
                                     showAddModal = false
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.ElectricViolet)
+                            colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent)
                         ) {
                             Text("Create Task")
                         }

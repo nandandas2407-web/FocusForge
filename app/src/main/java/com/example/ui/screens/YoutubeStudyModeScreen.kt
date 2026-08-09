@@ -65,7 +65,7 @@ fun YoutubeStudyModeScreen(
                             Icon(
                                 imageVector = Icons.Default.School,
                                 contentDescription = null,
-                                tint = GlassTokens.WarmGold,
+                                tint = GlassTokens.Warning,
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -79,7 +79,7 @@ fun YoutubeStudyModeScreen(
                                 Text(
                                     text = if (isStudyModeEnabled) "Active: Non-educational content is restricted" else "Disabled: Normal YouTube access",
                                     fontSize = 12.sp,
-                                    color = if (isStudyModeEnabled) GlassTokens.VibrantGreen else GlassTokens.TextSecondary
+                                    color = if (isStudyModeEnabled) GlassTokens.Success else GlassTokens.TextSecondary
                                 )
                             }
                         }
@@ -89,7 +89,7 @@ fun YoutubeStudyModeScreen(
                             onCheckedChange = onToggleStudyMode,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = GlassTokens.TextPrimary,
-                                checkedTrackColor = GlassTokens.WarmGold,
+                                checkedTrackColor = GlassTokens.Warning,
                                 uncheckedThumbColor = GlassTokens.TextSecondary,
                                 uncheckedTrackColor = GlassTokens.SurfaceDark
                             ),
@@ -106,7 +106,7 @@ fun YoutubeStudyModeScreen(
                         Icon(
                             imageVector = Icons.Default.Link,
                             contentDescription = null,
-                            tint = GlassTokens.ElectricViolet,
+                            tint = GlassTokens.Accent,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -136,7 +136,7 @@ fun YoutubeStudyModeScreen(
                     if (inputError) {
                         Text(
                             text = "Please enter a valid YouTube channel URL or name",
-                            color = GlassTokens.SoftRed,
+                            color = GlassTokens.Danger,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -157,7 +157,7 @@ fun YoutubeStudyModeScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.Default.Add,
-                        accentColor = GlassTokens.WarmGold,
+                        accentColor = GlassTokens.Warning,
                         testTagStr = "btn_add_youtube_channel"
                     )
                 }
@@ -228,7 +228,7 @@ private fun ChannelCardItem(
                 Text(
                     text = "ID / Handle: ${channel.channelId}",
                     fontSize = 12.sp,
-                    color = GlassTokens.WarmGold
+                    color = GlassTokens.Warning
                 )
             }
 

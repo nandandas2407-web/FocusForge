@@ -58,7 +58,7 @@ fun StatsDashboardScreen(
                         Icon(
                             imageVector = Icons.Default.BarChart,
                             contentDescription = null,
-                            tint = GlassTokens.NeonCyan,
+                            tint = GlassTokens.Info,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -87,7 +87,7 @@ fun StatsDashboardScreen(
                                 Icon(
                                     imageVector = Icons.Default.Savings,
                                     contentDescription = null,
-                                    tint = GlassTokens.VibrantGreen,
+                                    tint = GlassTokens.Success,
                                     modifier = Modifier.size(36.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
@@ -101,7 +101,7 @@ fun StatsDashboardScreen(
                                     Text(
                                         text = "Total Tracked Foreground Screen Time Today: ${usageHours}h ${usageMins}m",
                                         fontSize = 12.sp,
-                                        color = GlassTokens.VibrantGreen
+                                        color = GlassTokens.Success
                                     )
                                 }
                             }
@@ -172,7 +172,7 @@ fun StatsDashboardScreen(
                                         text = "${minutes}m",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = GlassTokens.NeonCyan
+                                        color = GlassTokens.Info
                                     )
                                 }
 
@@ -190,7 +190,7 @@ fun StatsDashboardScreen(
                                             .fillMaxWidth(progress)
                                             .fillMaxHeight()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(GlassTokens.ElectricViolet)
+                                            .background(GlassTokens.Accent)
                                     )
                                 }
                             }

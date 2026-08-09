@@ -54,7 +54,7 @@ fun CalendarScreen(
                         Icon(
                             imageVector = Icons.Default.CalendarMonth,
                             contentDescription = null,
-                            tint = GlassTokens.NeonCyan,
+                            tint = GlassTokens.Info,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -80,7 +80,7 @@ fun CalendarScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Event",
-                            tint = GlassTokens.NeonCyan
+                            tint = GlassTokens.Info
                         )
                     }
                 }
@@ -109,7 +109,7 @@ fun CalendarScreen(
                                 Icon(
                                     imageVector = Icons.Default.Timer,
                                     contentDescription = null,
-                                    tint = GlassTokens.SoftRed,
+                                    tint = GlassTokens.Danger,
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -132,7 +132,7 @@ fun CalendarScreen(
                                 text = "5 Days Left",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = GlassTokens.SoftRed
+                                color = GlassTokens.Danger
                             )
                         }
                     }
@@ -161,7 +161,7 @@ fun CalendarScreen(
                             Icon(
                                 imageVector = Icons.Default.Event,
                                 contentDescription = null,
-                                tint = GlassTokens.ElectricViolet,
+                                tint = GlassTokens.Accent,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -196,7 +196,7 @@ fun CalendarScreen(
                                 showModal = false
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.ElectricViolet)
+                        colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent)
                     ) {
                         Text("Add Event")
                     }

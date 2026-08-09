@@ -53,7 +53,7 @@ fun StreaksGoalsScreen(
                         Icon(
                             imageVector = Icons.Default.LocalFireDepartment,
                             contentDescription = null,
-                            tint = GlassTokens.WarmGold,
+                            tint = GlassTokens.Warning,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -91,7 +91,7 @@ fun StreaksGoalsScreen(
                                     text = "$currentStreak Days",
                                     fontSize = 36.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = GlassTokens.WarmGold
+                                    color = GlassTokens.Warning
                                 )
                                 Text(
                                     text = "Personal Best: $bestStreak Days",
@@ -103,7 +103,7 @@ fun StreaksGoalsScreen(
                             Icon(
                                 imageVector = Icons.Default.LocalFireDepartment,
                                 contentDescription = null,
-                                tint = GlassTokens.WarmGold,
+                                tint = GlassTokens.Warning,
                                 modifier = Modifier.size(64.dp)
                             )
                         }
@@ -135,8 +135,8 @@ fun StreaksGoalsScreen(
                             valueRange = 30f..300f,
                             steps = 8,
                             colors = SliderDefaults.colors(
-                                thumbColor = GlassTokens.ElectricViolet,
-                                activeTrackColor = GlassTokens.ElectricViolet
+                                thumbColor = GlassTokens.Accent,
+                                activeTrackColor = GlassTokens.Accent
                             )
                         )
                     }
@@ -188,7 +188,7 @@ private fun BadgeCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isUnlocked) GlassTokens.WarmGold else GlassTokens.TextMuted,
+                tint = if (isUnlocked) GlassTokens.Warning else GlassTokens.TextMuted,
                 modifier = Modifier.size(36.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))

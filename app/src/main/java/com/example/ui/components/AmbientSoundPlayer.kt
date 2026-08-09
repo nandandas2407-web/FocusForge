@@ -53,7 +53,7 @@ fun AmbientSoundPlayer(
                 Icon(
                     imageVector = Icons.Default.MusicNote,
                     contentDescription = null,
-                    tint = GlassTokens.NeonCyan,
+                    tint = GlassTokens.Info,
                     modifier = Modifier.size(22.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -71,7 +71,7 @@ fun AmbientSoundPlayer(
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.PauseCircle else Icons.Default.PlayCircle,
                     contentDescription = "Play/Pause Sound",
-                    tint = GlassTokens.ElectricViolet,
+                    tint = GlassTokens.Accent,
                     modifier = Modifier.size(36.dp)
                 )
             }
@@ -93,7 +93,7 @@ fun AmbientSoundPlayer(
                             isPlaying = true
                         },
                     shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) GlassTokens.ElectricViolet.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.08f)
+                    color = if (isSelected) GlassTokens.Accent.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.08f)
                 ) {
                     Box(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -124,8 +124,8 @@ fun AmbientSoundPlayer(
                     onValueChange = { volume = it },
                     modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                     colors = SliderDefaults.colors(
-                        thumbColor = GlassTokens.NeonCyan,
-                        activeTrackColor = GlassTokens.NeonCyan,
+                        thumbColor = GlassTokens.Info,
+                        activeTrackColor = GlassTokens.Info,
                         inactiveTrackColor = Color.White.copy(alpha = 0.15f)
                     )
                 )

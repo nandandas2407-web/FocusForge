@@ -44,7 +44,7 @@ fun WebsiteBlockerScreen(
                     Icon(
                         imageVector = Icons.Default.Public,
                         contentDescription = null,
-                        tint = GlassTokens.NeonCyan,
+                        tint = GlassTokens.Info,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -90,7 +90,7 @@ fun WebsiteBlockerScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.Default.Add,
-                        accentColor = GlassTokens.NeonCyan,
+                        accentColor = GlassTokens.Info,
                         testTagStr = "btn_add_domain"
                     )
                 }
@@ -123,7 +123,7 @@ fun WebsiteBlockerScreen(
                             Text(
                                 text = "Category: ${item.category}",
                                 fontSize = 12.sp,
-                                color = GlassTokens.NeonCyan
+                                color = GlassTokens.Info
                             )
                         }
 

@@ -82,7 +82,7 @@ fun FocusTimerScreen(
                     Text(
                         text = "Deep work session • App Blocker Active",
                         fontSize = 13.sp,
-                        color = GlassTokens.NeonCyan
+                        color = GlassTokens.Info
                     )
                 }
             }
@@ -125,7 +125,7 @@ fun FocusTimerScreen(
                             progress = progress,
                             timeText = timeFormatted,
                             statusText = if (isRunning) "FOCUSING" else "PAUSED",
-                            accentColor = GlassTokens.ElectricViolet
+                            accentColor = GlassTokens.Accent
                         )
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -175,7 +175,7 @@ fun FocusTimerScreen(
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
-                                tint = GlassTokens.WarmGold,
+                                tint = GlassTokens.Warning,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -198,8 +198,8 @@ fun FocusTimerScreen(
                             checked = isStrictModeActive,
                             onCheckedChange = { isStrictModeActive = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GlassTokens.WarmGold,
-                                checkedTrackColor = GlassTokens.WarmGold.copy(alpha = 0.3f)
+                                checkedThumbColor = GlassTokens.Warning,
+                                checkedTrackColor = GlassTokens.Warning.copy(alpha = 0.3f)
                             )
                         )
                     }

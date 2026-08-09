@@ -60,7 +60,7 @@ fun ThemeCustomizerScreen(
                     Icon(
                         imageVector = Icons.Default.Palette,
                         contentDescription = null,
-                        tint = GlassTokens.ElectricViolet,
+                        tint = GlassTokens.Accent,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -151,8 +151,8 @@ fun ThemeCustomizerScreen(
                         },
                         valueRange = 8f..48f,
                         colors = SliderDefaults.colors(
-                            thumbColor = GlassTokens.NeonCyan,
-                            activeTrackColor = GlassTokens.NeonCyan
+                            thumbColor = GlassTokens.Info,
+                            activeTrackColor = GlassTokens.Info
                         )
                     )
                 }
@@ -176,8 +176,8 @@ fun ThemeCustomizerScreen(
                         },
                         valueRange = 0.05f..0.35f,
                         colors = SliderDefaults.colors(
-                            thumbColor = GlassTokens.ElectricViolet,
-                            activeTrackColor = GlassTokens.ElectricViolet
+                            thumbColor = GlassTokens.Accent,
+                            activeTrackColor = GlassTokens.Accent
                         )
                     )
                 }
@@ -190,7 +190,7 @@ fun ThemeCustomizerScreen(
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = null,
-                            tint = GlassTokens.NeonCyan,
+                            tint = GlassTokens.Info,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -209,7 +209,7 @@ fun ThemeCustomizerScreen(
                         }
                         Button(
                             onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
-                            colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.ElectricViolet)
+                            colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent)
                         ) {
                             Text("Open", fontSize = 12.sp)
                         }
@@ -231,8 +231,8 @@ private fun PresetChip(
     Box(
         modifier = modifier
             .clip(shape)
-            .background(if (isSelected) GlassTokens.ElectricViolet.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f))
-            .border(1.dp, if (isSelected) GlassTokens.ElectricViolet else Color.White.copy(alpha = 0.15f), shape)
+            .background(if (isSelected) GlassTokens.Accent.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f))
+            .border(1.dp, if (isSelected) GlassTokens.Accent else Color.White.copy(alpha = 0.15f), shape)
             .clickable { onClick() }
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
