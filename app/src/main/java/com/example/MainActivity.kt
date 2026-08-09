@@ -78,88 +78,82 @@ class MainActivity : ComponentActivity() {
                         onFinishOnboarding = { hasCompletedOnboarding = true }
                     )
                 } else {
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(GlassTokens.DarkBase)
-                    ) {
-                        val isTablet = maxWidth >= 600.dp
+                    val isTablet = Responsive.isTablet()
 
-                        if (isTablet) {
-                            // Responsive Tablet Layout with Side Navigation Rail
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                GlassNavRail(
+                    if (isTablet) {
+                        // Tablet: Side Navigation Rail + Content
+                        Row(modifier = Modifier.fillMaxSize().background(GlassTokens.DarkBase)) {
+                            GlassNavRail(
+                                currentRoute = currentRoute,
+                                onNavigate = { route -> navController.navigate(route) },
+                                items = navItems
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            ) {
+                                MainNavHost(
+                                    navController = navController,
+                                    focusViewModel = focusViewModel,
+                                    taskViewModel = taskViewModel,
+                                    calendarViewModel = calendarViewModel,
+                                    themeViewModel = themeViewModel,
+                                    blockedApps = blockedApps,
+                                    focusSessions = focusSessions,
+                                    timerSeconds = timerSeconds,
+                                    isTimerRunning = isTimerRunning,
+                                    timerMode = timerMode,
+                                    youtubeWhitelist = youtubeWhitelist,
+                                    websiteBlocks = websiteBlocks,
+                                    streakGoal = streakGoal,
+                                    tasks = tasks,
+                                    calendarEvents = calendarEvents,
+                                    usageStats = usageStats,
+                                    themeSettings = themeSettings
+                                )
+                            }
+                        }
+                    } else {
+                        // Phone: Bottom Navigation Bar + Content
+                        Scaffold(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(GlassTokens.DarkBase),
+                            containerColor = Color.Transparent,
+                            bottomBar = {
+                                GlassBottomNav(
                                     currentRoute = currentRoute,
                                     onNavigate = { route -> navController.navigate(route) },
                                     items = navItems
                                 )
-
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight()
-                                ) {
-                                    MainNavHost(
-                                        navController = navController,
-                                        focusViewModel = focusViewModel,
-                                        taskViewModel = taskViewModel,
-                                        calendarViewModel = calendarViewModel,
-                                        themeViewModel = themeViewModel,
-                                        blockedApps = blockedApps,
-                                        focusSessions = focusSessions,
-                                        timerSeconds = timerSeconds,
-                                        isTimerRunning = isTimerRunning,
-                                        timerMode = timerMode,
-                                        youtubeWhitelist = youtubeWhitelist,
-                                        websiteBlocks = websiteBlocks,
-                                        streakGoal = streakGoal,
-                                        tasks = tasks,
-                                        calendarEvents = calendarEvents,
-                                        usageStats = usageStats,
-                                        themeSettings = themeSettings
-                                    )
-                                }
                             }
-                        } else {
-                            // Standard Phone Layout with Bottom Navigation Bar
-                            Scaffold(
+                        ) { innerPadding ->
+                            Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(GlassTokens.DarkBase),
-                                containerColor = Color.Transparent,
-                                bottomBar = {
-                                    GlassBottomNav(
-                                        currentRoute = currentRoute,
-                                        onNavigate = { route -> navController.navigate(route) },
-                                        items = navItems
-                                    )
-                                }
-                            ) { innerPadding ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(innerPadding)
-                                ) {
-                                    MainNavHost(
-                                        navController = navController,
-                                        focusViewModel = focusViewModel,
-                                        taskViewModel = taskViewModel,
-                                        calendarViewModel = calendarViewModel,
-                                        themeViewModel = themeViewModel,
-                                        blockedApps = blockedApps,
-                                        focusSessions = focusSessions,
-                                        timerSeconds = timerSeconds,
-                                        isTimerRunning = isTimerRunning,
-                                        timerMode = timerMode,
-                                        youtubeWhitelist = youtubeWhitelist,
-                                        websiteBlocks = websiteBlocks,
-                                        streakGoal = streakGoal,
-                                        tasks = tasks,
-                                        calendarEvents = calendarEvents,
-                                        usageStats = usageStats,
-                                        themeSettings = themeSettings
-                                    )
-                                }
+                                    .padding(innerPadding)
+                            ) {
+                                MainNavHost(
+                                    navController = navController,
+                                    focusViewModel = focusViewModel,
+                                    taskViewModel = taskViewModel,
+                                    calendarViewModel = calendarViewModel,
+                                    themeViewModel = themeViewModel,
+                                    blockedApps = blockedApps,
+                                    focusSessions = focusSessions,
+                                    timerSeconds = timerSeconds,
+                                    isTimerRunning = isTimerRunning,
+                                    timerMode = timerMode,
+                                    youtubeWhitelist = youtubeWhitelist,
+                                    websiteBlocks = websiteBlocks,
+                                    streakGoal = streakGoal,
+                                    tasks = tasks,
+                                    calendarEvents = calendarEvents,
+                                    usageStats = usageStats,
+                                    themeSettings = themeSettings
+                                )
                             }
                         }
                     }

@@ -3,6 +3,7 @@
 // PURPOSE: Educational YouTube whitelist manager screen for Focus Study Mode
 //          with link parsing, toggle on/off, and responsive tablet layout.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — tablet-responsive layout with 2-column whitelist grid
 // ============================================================
 
 package com.example.ui.screens
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -38,22 +38,11 @@ fun YoutubeStudyModeScreen(
 ) {
     var channelInput by remember { mutableStateOf("") }
     var inputError by remember { mutableStateOf(false) }
+    val isTablet = Responsive.isTablet()
 
     WallpaperBackground(preset = "COSMIC_NEON") {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            val isTablet = maxWidth >= 600.dp
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 840.dp)
-                    .padding(horizontal = if (isTablet) 32.dp else 20.dp)
-            ) {
-                Spacer(modifier = Modifier.height(24.dp))
-
+        ResponsiveScaffold {
+            Column(modifier = Modifier.fillMaxSize()) {
                 // Header & Toggle Bar
                 GlassCard(modifier = Modifier.fillMaxWidth().testTag("youtube_study_toggle_card")) {
                     Row(
@@ -66,19 +55,19 @@ fun YoutubeStudyModeScreen(
                                 imageVector = Icons.Default.School,
                                 contentDescription = null,
                                 tint = GlassTokens.Warning,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(if (isTablet) 36.dp else 32.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = "YouTube Study Mode",
-                                    fontSize = 22.sp,
+                                    fontSize = if (isTablet) 26.sp else 22.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = GlassTokens.TextPrimary
                                 )
                                 Text(
                                     text = if (isStudyModeEnabled) "Active: Non-educational content is restricted" else "Disabled: Normal YouTube access",
-                                    fontSize = 12.sp,
+                                    fontSize = if (isTablet) 14.sp else 12.sp,
                                     color = if (isStudyModeEnabled) GlassTokens.Success else GlassTokens.TextSecondary
                                 )
                             }
@@ -98,9 +87,9 @@ fun YoutubeStudyModeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
 
-                // Add Educational Channel by Link/Title Form
+                // Add Channel Form
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -120,7 +109,7 @@ fun YoutubeStudyModeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Paste a YouTube channel URL (preferably an @handle), handle, or exact channel title. Only whitelisted channels can play videos in Study Mode.",
-                        fontSize = 12.sp,
+                        fontSize = if (isTablet) 13.sp else 12.sp,
                         color = GlassTokens.TextSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -162,11 +151,11 @@ fun YoutubeStudyModeScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
 
                 Text(
                     text = "Approved Whitelisted Channels (${whitelist.size})",
-                    fontSize = 18.sp,
+                    fontSize = if (isTablet) 20.sp else 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = GlassTokens.TextPrimary
                 )
@@ -212,6 +201,7 @@ private fun ChannelCardItem(
     channel: YoutubeWhitelistEntity,
     onRemoveChannel: (channel: YoutubeWhitelistEntity) -> Unit
 ) {
+    val isTablet = Responsive.isTablet()
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -221,13 +211,13 @@ private fun ChannelCardItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = channel.channelTitle,
-                    fontSize = 16.sp,
+                    fontSize = if (isTablet) 18.sp else 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = GlassTokens.TextPrimary
                 )
                 Text(
                     text = "ID / Handle: ${channel.channelId}",
-                    fontSize = 12.sp,
+                    fontSize = if (isTablet) 14.sp else 12.sp,
                     color = GlassTokens.Warning
                 )
             }

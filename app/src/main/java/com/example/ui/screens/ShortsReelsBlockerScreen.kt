@@ -1,14 +1,14 @@
 // ============================================================
 // FILE: app/src/main/java/com/example/ui/screens/ShortsReelsBlockerScreen.kt
-// PURPOSE: Granular Reels & Shorts sub-screen blocking manager with live counters
-//          and tablet-optimized layout.
+// PURPOSE: Granular Reels & Shorts sub-screen blocking manager with live counters.
+//          Tablet layout: Instagram and YouTube cards side-by-side in a Row.
+//          Phone layout: stacked vertically.
 // CREATED: 2026-08-09
 // ============================================================
 
 package com.example.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.MovieFilter
@@ -38,161 +38,286 @@ fun ShortsReelsBlockerScreen(
     val isShortsBlocked = youtube?.isShortsBlocked ?: true
     val shortsBlockedCount = youtube?.timesBlockedToday ?: 0
 
-    WallpaperBackground(preset = "COSMIC_NEON") {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            val isTablet = maxWidth >= 600.dp
+    val isTablet = Responsive.isTablet()
+    val sectionSpacing = Responsive.sectionSpacing()
 
+    WallpaperBackground(preset = "COSMIC_NEON") {
+        ResponsiveScaffold(
+            modifier = Modifier.fillMaxSize()
+        ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 840.dp)
-                    .padding(horizontal = if (isTablet) 32.dp else 20.dp),
-                contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(sectionSpacing)
             ) {
+                // Header
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.MovieFilter,
                             contentDescription = null,
                             tint = GlassTokens.Info,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(if (isTablet) 36.dp else 32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 text = "Shorts & Reels Blocker",
-                                fontSize = 26.sp,
+                                fontSize = if (isTablet) 30.sp else 26.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = GlassTokens.TextPrimary
                             )
                             Text(
                                 text = "Block addictive short-form video feeds while keeping main app functionality",
-                                fontSize = 12.sp,
+                                fontSize = if (isTablet) 14.sp else 12.sp,
                                 color = GlassTokens.TextSecondary
                             )
                         }
                     }
                 }
 
-                // Instagram Reels Card
-                item {
-                    GlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("card_block_reels")
-                    ) {
+                // Platform cards: tablet side-by-side, phone stacked
+                if (isTablet) {
+                    item {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(sectionSpacing),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically
+                            // Instagram Reels Card
+                            GlassCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("card_block_reels")
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.VideoLibrary,
-                                    contentDescription = null,
-                                    tint = GlassTokens.Accent,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.VideoLibrary,
+                                                contentDescription = null,
+                                                tint = GlassTokens.Accent,
+                                                modifier = Modifier.size(28.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Column {
+                                                Text(
+                                                    text = "Instagram Reels",
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = GlassTokens.TextPrimary
+                                                )
+                                                Text(
+                                                    text = "Blocks Reels tab while allowing DMs & posts",
+                                                    fontSize = 12.sp,
+                                                    color = GlassTokens.TextSecondary
+                                                )
+                                            }
+                                        }
+
+                                        Switch(
+                                            checked = isReelsBlocked,
+                                            onCheckedChange = { checked ->
+                                                onToggleReelsBlocked("com.instagram.android", "Instagram", checked)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = GlassTokens.Accent,
+                                                checkedTrackColor = GlassTokens.Accent.copy(alpha = 0.3f)
+                                            )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Text(
-                                        text = "Instagram Reels",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = GlassTokens.TextPrimary
-                                    )
-                                    Text(
-                                        text = "Blocks Reels tab while allowing DMs & posts",
+                                        text = if (reelsBlockedCount > 0) "$reelsBlockedCount Reels loops intercepted today" else "0 Reels attempts blocked today",
                                         fontSize = 12.sp,
-                                        color = GlassTokens.TextSecondary
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GlassTokens.Success
                                     )
                                 }
                             }
 
-                            Switch(
-                                checked = isReelsBlocked,
-                                onCheckedChange = { checked ->
-                                    onToggleReelsBlocked("com.instagram.android", "Instagram", checked)
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = GlassTokens.Accent,
-                                    checkedTrackColor = GlassTokens.Accent.copy(alpha = 0.3f)
-                                )
-                            )
+                            // YouTube Shorts Card
+                            GlassCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("card_block_shorts")
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Block,
+                                                contentDescription = null,
+                                                tint = GlassTokens.Danger,
+                                                modifier = Modifier.size(28.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Column {
+                                                Text(
+                                                    text = "YouTube Shorts",
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = GlassTokens.TextPrimary
+                                                )
+                                                Text(
+                                                    text = "Intercepts Shorts player while keeping long-form videos",
+                                                    fontSize = 12.sp,
+                                                    color = GlassTokens.TextSecondary
+                                                )
+                                            }
+                                        }
+
+                                        Switch(
+                                            checked = isShortsBlocked,
+                                            onCheckedChange = { checked ->
+                                                onToggleShortsBlocked("com.google.android.youtube", "YouTube", checked)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = GlassTokens.Danger,
+                                                checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                                            )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = if (shortsBlockedCount > 0) "$shortsBlockedCount Shorts attempts blocked today" else "0 Shorts attempts blocked today",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GlassTokens.Success
+                                    )
+                                }
+                            }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = if (reelsBlockedCount > 0) "$reelsBlockedCount Reels loops intercepted today" else "0 Reels attempts blocked today",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = GlassTokens.Success
-                        )
                     }
-                }
-
-                // YouTube Shorts Card
-                item {
-                    GlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("card_block_shorts")
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                } else {
+                    // Phone: stacked vertically
+                    item {
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("card_block_reels")
                         ) {
                             Row(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Block,
-                                    contentDescription = null,
-                                    tint = GlassTokens.Danger,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = "YouTube Shorts",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = GlassTokens.TextPrimary
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.VideoLibrary,
+                                        contentDescription = null,
+                                        tint = GlassTokens.Accent,
+                                        modifier = Modifier.size(28.dp)
                                     )
-                                    Text(
-                                        text = "Intercepts Shorts player while keeping long-form videos",
-                                        fontSize = 12.sp,
-                                        color = GlassTokens.TextSecondary
-                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = "Instagram Reels",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = GlassTokens.TextPrimary
+                                        )
+                                        Text(
+                                            text = "Blocks Reels tab while allowing DMs & posts",
+                                            fontSize = 12.sp,
+                                            color = GlassTokens.TextSecondary
+                                        )
+                                    }
                                 }
-                            }
 
-                            Switch(
-                                checked = isShortsBlocked,
-                                onCheckedChange = { checked ->
-                                    onToggleShortsBlocked("com.google.android.youtube", "YouTube", checked)
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = GlassTokens.Danger,
-                                    checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                                Switch(
+                                    checked = isReelsBlocked,
+                                    onCheckedChange = { checked ->
+                                        onToggleReelsBlocked("com.instagram.android", "Instagram", checked)
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = GlassTokens.Accent,
+                                        checkedTrackColor = GlassTokens.Accent.copy(alpha = 0.3f)
+                                    )
                                 )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = if (reelsBlockedCount > 0) "$reelsBlockedCount Reels loops intercepted today" else "0 Reels attempts blocked today",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = GlassTokens.Success
                             )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = if (shortsBlockedCount > 0) "$shortsBlockedCount Shorts attempts blocked today" else "0 Shorts attempts blocked today",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = GlassTokens.Success
-                        )
+                    }
+
+                    item {
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("card_block_shorts")
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Block,
+                                        contentDescription = null,
+                                        tint = GlassTokens.Danger,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = "YouTube Shorts",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = GlassTokens.TextPrimary
+                                        )
+                                        Text(
+                                            text = "Intercepts Shorts player while keeping long-form videos",
+                                            fontSize = 12.sp,
+                                            color = GlassTokens.TextSecondary
+                                        )
+                                    }
+                                }
+
+                                Switch(
+                                    checked = isShortsBlocked,
+                                    onCheckedChange = { checked ->
+                                        onToggleShortsBlocked("com.google.android.youtube", "YouTube", checked)
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = GlassTokens.Danger,
+                                        checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = if (shortsBlockedCount > 0) "$shortsBlockedCount Shorts attempts blocked today" else "0 Shorts attempts blocked today",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = GlassTokens.Success
+                            )
+                        }
                     }
                 }
             }

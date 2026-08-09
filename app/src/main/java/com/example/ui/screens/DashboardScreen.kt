@@ -3,6 +3,7 @@
 // PURPOSE: Main Home Dashboard with Liquid Glass hero card, dynamic usage statistics,
 //          real focus session goals, quick action row, and today's schedule timeline.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — Responsive layout with tablet grid support
 // ============================================================
 
 package com.example.ui.screens
@@ -13,6 +14,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,6 +51,10 @@ fun DashboardScreen(
     streakGoal: StreakGoalEntity? = null,
     usageStats: List<AppUsageInfo> = emptyList()
 ) {
+    val isTablet = Responsive.isTablet()
+    val horizontalPadding = Responsive.horizontalPadding()
+    val sectionSpacing = Responsive.sectionSpacing()
+
     // Calculate real foreground usage today
     val totalUsageMs = usageStats.sumOf { it.totalTimeInForegroundMs }
     val usageHours = (totalUsageMs / 3600000).toInt()
@@ -58,25 +67,16 @@ fun DashboardScreen(
     val streakDays = streakGoal?.currentStreakDays ?: 1
     val dailyGoalMinutes = streakGoal?.dailyScreenTimeGoalMinutes ?: 120
     val totalScreenTimeMinutes = (totalUsageMs / 60000).toInt()
-    
+
     val progressFraction = if (dailyGoalMinutes > 0) {
         (totalScreenTimeMinutes.toFloat() / dailyGoalMinutes.toFloat()).coerceIn(0f, 1f)
     } else 0.5f
 
     WallpaperBackground(preset = "COSMIC_NEON") {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            val isTablet = maxWidth >= 600.dp
-
+        ResponsiveScaffold {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 840.dp)
-                    .padding(horizontal = if (isTablet) 32.dp else 20.dp),
-                contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(sectionSpacing)
             ) {
                 // Header Bar
                 item {
@@ -130,64 +130,130 @@ fun DashboardScreen(
                 // Hero Card: Real Screen Time & Real Goal Progress
                 item {
                     GlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Today's Screen Time",
-                                    fontSize = 14.sp,
-                                    color = GlassTokens.TextSecondary,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = if (totalUsageMs > 0) "${usageHours}h ${usageMinutes}m" else "0m tracked",
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = GlassTokens.TextPrimary
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Timer,
-                                        contentDescription = null,
-                                        tint = GlassTokens.Success,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
+                        if (isTablet) {
+                            // Tablet: stats side-by-side with more spacing
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(32.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "$todayFocusMinutes mins focused today",
-                                        fontSize = 12.sp,
-                                        color = GlassTokens.Success,
-                                        fontWeight = FontWeight.SemiBold
+                                        text = "Today's Screen Time",
+                                        fontSize = 14.sp,
+                                        color = GlassTokens.TextSecondary,
+                                        fontWeight = FontWeight.Medium
                                     )
-                                }
-                            }
-
-                            // Circular progress indicator based on real goal
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(90.dp)) {
-                                CircularProgressIndicator(
-                                    progress = { progressFraction },
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = GlassTokens.Accent,
-                                    trackColor = Color.White.copy(alpha = 0.15f),
-                                    strokeWidth = 10.dp
-                                )
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "${(progressFraction * 100).toInt()}%",
-                                        fontSize = 18.sp,
+                                        text = if (totalUsageMs > 0) "${usageHours}h ${usageMinutes}m" else "0m tracked",
+                                        fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = GlassTokens.TextPrimary
                                     )
-                                    Text(
-                                        text = "Limit",
-                                        fontSize = 10.sp,
-                                        color = GlassTokens.TextMuted
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Timer,
+                                            contentDescription = null,
+                                            tint = GlassTokens.Success,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "$todayFocusMinutes mins focused today",
+                                            fontSize = 12.sp,
+                                            color = GlassTokens.Success,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                }
+
+                                // Circular progress indicator based on real goal
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(100.dp)) {
+                                    CircularProgressIndicator(
+                                        progress = { progressFraction },
+                                        modifier = Modifier.fillMaxSize(),
+                                        color = GlassTokens.Accent,
+                                        trackColor = Color.White.copy(alpha = 0.15f),
+                                        strokeWidth = 10.dp
                                     )
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "${(progressFraction * 100).toInt()}%",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = GlassTokens.TextPrimary
+                                        )
+                                        Text(
+                                            text = "Limit",
+                                            fontSize = 10.sp,
+                                            color = GlassTokens.TextMuted
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            // Phone: original layout
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Today's Screen Time",
+                                        fontSize = 14.sp,
+                                        color = GlassTokens.TextSecondary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = if (totalUsageMs > 0) "${usageHours}h ${usageMinutes}m" else "0m tracked",
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GlassTokens.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Timer,
+                                            contentDescription = null,
+                                            tint = GlassTokens.Success,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "$todayFocusMinutes mins focused today",
+                                            fontSize = 12.sp,
+                                            color = GlassTokens.Success,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                }
+
+                                // Circular progress indicator based on real goal
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(90.dp)) {
+                                    CircularProgressIndicator(
+                                        progress = { progressFraction },
+                                        modifier = Modifier.fillMaxSize(),
+                                        color = GlassTokens.Accent,
+                                        trackColor = Color.White.copy(alpha = 0.15f),
+                                        strokeWidth = 10.dp
+                                    )
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "${(progressFraction * 100).toInt()}%",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = GlassTokens.TextPrimary
+                                        )
+                                        Text(
+                                            text = "Limit",
+                                            fontSize = 10.sp,
+                                            color = GlassTokens.TextMuted
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -214,45 +280,53 @@ fun DashboardScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        item {
-                            ActionChip(
-                                title = "App Blocker",
-                                icon = Icons.Default.Block,
-                                accent = GlassTokens.Accent,
-                                onClick = onNavigateToBlocker,
-                                testTagStr = "chip_app_blocker"
-                            )
+                    val quickActions = listOf(
+                        Triple("App Blocker", Icons.Default.Block, GlassTokens.Accent) to onNavigateToBlocker,
+                        Triple("Reels & Shorts", Icons.Default.MovieFilter, GlassTokens.Info) to onNavigateToShorts,
+                        Triple("Study YouTube", Icons.Default.School, GlassTokens.Warning) to onNavigateToYoutube,
+                        Triple("Add Task", Icons.Default.Add, GlassTokens.Success) to onNavigateToTasks
+                    )
+
+                    val testTags = listOf("chip_app_blocker", "chip_reels_shorts", "chip_study_youtube", "chip_add_task")
+
+                    if (isTablet) {
+                        // Tablet: 2-column grid
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(((48.dp * 2) + 12.dp) * 2),
+                            userScrollEnabled = false
+                        ) {
+                            itemsIndexed(quickActions) { index, (action, onClick) ->
+                                val (title, icon, accent) = action
+                                ActionChip(
+                                    title = title,
+                                    icon = icon,
+                                    accent = accent,
+                                    onClick = onClick,
+                                    testTagStr = testTags[index]
+                                )
+                            }
                         }
-                        item {
-                            ActionChip(
-                                title = "Reels & Shorts",
-                                icon = Icons.Default.MovieFilter,
-                                accent = GlassTokens.Info,
-                                onClick = onNavigateToShorts,
-                                testTagStr = "chip_reels_shorts"
-                            )
-                        }
-                        item {
-                            ActionChip(
-                                title = "Study YouTube",
-                                icon = Icons.Default.School,
-                                accent = GlassTokens.Warning,
-                                onClick = onNavigateToYoutube,
-                                testTagStr = "chip_study_youtube"
-                            )
-                        }
-                        item {
-                            ActionChip(
-                                title = "Add Task",
-                                icon = Icons.Default.Add,
-                                accent = GlassTokens.Success,
-                                onClick = onNavigateToTasks,
-                                testTagStr = "chip_add_task"
-                            )
+                    } else {
+                        // Phone: horizontal row
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            itemsIndexed(quickActions) { index, (action, onClick) ->
+                                val (title, icon, accent) = action
+                                ActionChip(
+                                    title = title,
+                                    icon = icon,
+                                    accent = accent,
+                                    onClick = onClick,
+                                    testTagStr = testTags[index]
+                                )
+                            }
                         }
                     }
                 }
@@ -290,50 +364,72 @@ fun DashboardScreen(
                             )
                         }
                     }
-                } else {
-                    items(tasks.size) { index ->
-                        val task = tasks[index]
-                        GlassCard(modifier = Modifier.fillMaxWidth()) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (task.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                                    contentDescription = null,
-                                    tint = if (task.isCompleted) GlassTokens.Success else GlassTokens.TextSecondary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = task.title,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = GlassTokens.TextPrimary
-                                    )
-                                    if (task.notes.isNotEmpty()) {
-                                        Text(
-                                            text = task.notes,
-                                            fontSize = 12.sp,
-                                            color = GlassTokens.TextSecondary
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = GlassTokens.Accent.copy(alpha = 0.2f)
-                                ) {
-                                    Text(
-                                        text = task.priority,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = GlassTokens.Accent,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                }
+                } else if (isTablet) {
+                    // Tablet: 2-column task grid
+                    item {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(((72.dp) * tasks.size.coerceAtMost(4)) + (12.dp * (tasks.size.coerceAtMost(4) - 1).coerceAtLeast(0))),
+                            userScrollEnabled = false
+                        ) {
+                            itemsIndexed(tasks) { _, task ->
+                                TaskCard(task = task)
                             }
                         }
                     }
+                } else {
+                    // Phone: single-column task list
+                    itemsIndexed(tasks) { _, task ->
+                        TaskCard(task = task)
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskCard(task: TaskEntity) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = if (task.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (task.isCompleted) GlassTokens.Success else GlassTokens.TextSecondary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = task.title,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = GlassTokens.TextPrimary
+                )
+                if (task.notes.isNotEmpty()) {
+                    Text(
+                        text = task.notes,
+                        fontSize = 12.sp,
+                        color = GlassTokens.TextSecondary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = GlassTokens.Accent.copy(alpha = 0.2f)
+            ) {
+                Text(
+                    text = task.priority,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GlassTokens.Accent,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
             }
         }
     }

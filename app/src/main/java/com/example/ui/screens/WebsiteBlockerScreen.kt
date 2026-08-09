@@ -2,6 +2,7 @@
 // FILE: app/src/main/java/com/example/ui/screens/WebsiteBlockerScreen.kt
 // PURPOSE: Website & Domain level blocker management screen.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — tablet-responsive layout with wider domain list
 // ============================================================
 
 package com.example.ui.screens
@@ -30,110 +31,205 @@ fun WebsiteBlockerScreen(
     onRemoveDomain: (item: WebsiteBlockEntity) -> Unit
 ) {
     var newDomainInput by remember { mutableStateOf("") }
+    val isTablet = Responsive.isTablet()
 
     WallpaperBackground(preset = "COSMIC_NEON") {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Public,
-                        contentDescription = null,
-                        tint = GlassTokens.Info,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Website Blocker",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = GlassTokens.TextPrimary
+        ResponsiveScaffold {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(Responsive.sectionSpacing())
+            ) {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = null,
+                            tint = GlassTokens.Info,
+                            modifier = Modifier.size(if (isTablet) 36.dp else 32.dp)
                         )
-                        Text(
-                            text = "Block distracting web domains across all mobile browsers",
-                            fontSize = 12.sp,
-                            color = GlassTokens.TextSecondary
-                        )
-                    }
-                }
-            }
-
-            item {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Block New Domain",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTokens.TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    GlassTextField(
-                        value = newDomainInput,
-                        onValueChange = { newDomainInput = it },
-                        placeholder = "e.g. reddit.com or shopping.com...",
-                        testTagStr = "input_website_domain"
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    GlassButton(
-                        text = "Add Domain to Blocklist",
-                        onClick = {
-                            if (newDomainInput.isNotBlank()) {
-                                onAddDomain(newDomainInput.lowercase().trim(), "Distracting")
-                                newDomainInput = ""
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        icon = Icons.Default.Add,
-                        accentColor = GlassTokens.Info,
-                        testTagStr = "btn_add_domain"
-                    )
-                }
-            }
-
-            item {
-                Text(
-                    text = "Blocked Domains",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = GlassTokens.TextPrimary
-                )
-            }
-
-            items(websiteBlocks.size) { idx ->
-                val item = websiteBlocks[idx]
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
                             Text(
-                                text = item.domain,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "Website Blocker",
+                                fontSize = if (isTablet) 30.sp else 26.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = GlassTokens.TextPrimary
                             )
                             Text(
-                                text = "Category: ${item.category}",
-                                fontSize = 12.sp,
-                                color = GlassTokens.Info
+                                text = "Block distracting web domains across all mobile browsers",
+                                fontSize = if (isTablet) 14.sp else 12.sp,
+                                color = GlassTokens.TextSecondary
                             )
                         }
+                    }
+                }
 
-                        IconButton(onClick = { onRemoveDomain(item) }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete Domain",
-                                tint = GlassTokens.TextSecondary
+                if (isTablet) {
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Responsive.sectionSpacing())
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = "Block New Domain",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GlassTokens.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    GlassTextField(
+                                        value = newDomainInput,
+                                        onValueChange = { newDomainInput = it },
+                                        placeholder = "e.g. reddit.com or shopping.com...",
+                                        testTagStr = "input_website_domain"
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    GlassButton(
+                                        text = "Add Domain to Blocklist",
+                                        onClick = {
+                                            if (newDomainInput.isNotBlank()) {
+                                                onAddDomain(newDomainInput.lowercase().trim(), "Distracting")
+                                                newDomainInput = ""
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        icon = Icons.Default.Add,
+                                        accentColor = GlassTokens.Info,
+                                        testTagStr = "btn_add_domain"
+                                    )
+                                }
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Blocked Domains",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GlassTokens.TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                DomainList(
+                                    websiteBlocks = websiteBlocks,
+                                    onRemoveDomain = onRemoveDomain
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    item {
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Block New Domain",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GlassTokens.TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            GlassTextField(
+                                value = newDomainInput,
+                                onValueChange = { newDomainInput = it },
+                                placeholder = "e.g. reddit.com or shopping.com...",
+                                testTagStr = "input_website_domain"
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            GlassButton(
+                                text = "Add Domain to Blocklist",
+                                onClick = {
+                                    if (newDomainInput.isNotBlank()) {
+                                        onAddDomain(newDomainInput.lowercase().trim(), "Distracting")
+                                        newDomainInput = ""
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                icon = Icons.Default.Add,
+                                accentColor = GlassTokens.Info,
+                                testTagStr = "btn_add_domain"
                             )
                         }
+                    }
+
+                    item {
+                        Text(
+                            text = "Blocked Domains",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GlassTokens.TextPrimary
+                        )
+                    }
+
+                    items(websiteBlocks.size) { idx ->
+                        val item = websiteBlocks[idx]
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = item.domain,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GlassTokens.TextPrimary
+                                    )
+                                    Text(
+                                        text = "Category: ${item.category}",
+                                        fontSize = 12.sp,
+                                        color = GlassTokens.Info
+                                    )
+                                }
+
+                                IconButton(onClick = { onRemoveDomain(item) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete Domain",
+                                        tint = GlassTokens.TextSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DomainList(
+    websiteBlocks: List<WebsiteBlockEntity>,
+    onRemoveDomain: (WebsiteBlockEntity) -> Unit
+) {
+    val isTablet = Responsive.isTablet()
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        websiteBlocks.forEach { item ->
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.domain,
+                            fontSize = if (isTablet) 18.sp else 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = GlassTokens.TextPrimary
+                        )
+                        Text(
+                            text = "Category: ${item.category}",
+                            fontSize = if (isTablet) 14.sp else 12.sp,
+                            color = GlassTokens.Info
+                        )
+                    }
+
+                    IconButton(onClick = { onRemoveDomain(item) }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Domain",
+                            tint = GlassTokens.TextSecondary
+                        )
                     }
                 }
             }

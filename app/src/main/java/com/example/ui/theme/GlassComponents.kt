@@ -219,6 +219,7 @@ fun GlassRingProgress(
     timeText: String,
     statusText: String,
     modifier: Modifier = Modifier,
+    ringSize: Dp = 220.dp,
     accentColor: Color = GlassTokens.Accent
 ) {
     val animatedProgress by animateFloatAsState(
@@ -227,7 +228,7 @@ fun GlassRingProgress(
     )
 
     Box(
-        modifier = modifier.size(220.dp),
+        modifier = modifier.size(ringSize),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {

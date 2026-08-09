@@ -2,6 +2,8 @@
 // FILE: app/src/main/java/com/example/ui/screens/AppBlockerScreen.kt
 // PURPOSE: App Blocker management screen with live search, category filter chips,
 //          and quick toggle switches for full app locks.
+//          Tablet layout uses 2-column grid via chunked rows;
+//          phone uses single LazyColumn.
 // CREATED: 2026-08-09
 // ============================================================
 
@@ -62,112 +64,183 @@ fun AppBlockerScreen(
             }
     }
 
+    val isTablet = Responsive.isTablet()
+    val sectionSpacing = Responsive.sectionSpacing()
+    val appItemModifier: Modifier = Modifier.fillMaxWidth()
+
     WallpaperBackground(preset = "COSMIC_NEON") {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ResponsiveScaffold(
+            modifier = Modifier.fillMaxSize()
         ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Apps,
-                        contentDescription = null,
-                        tint = GlassTokens.Accent,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "App Blocker",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = GlassTokens.TextPrimary
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(sectionSpacing)
+            ) {
+                // Header
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Apps,
+                            contentDescription = null,
+                            tint = GlassTokens.Accent,
+                            modifier = Modifier.size(if (isTablet) 36.dp else 32.dp)
                         )
-                        Text(
-                            text = "Choose applications to restrict during focus sessions",
-                            fontSize = 12.sp,
-                            color = GlassTokens.TextSecondary
-                        )
-                    }
-                }
-            }
-
-            // Search Bar
-            item {
-                GlassTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = "Search installed applications...",
-                    testTagStr = "app_blocker_search_input"
-                )
-            }
-
-            // Category Filter Chips
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(categories.size) { idx ->
-                        val cat = categories[idx]
-                        GlassChip(
-                            text = cat,
-                            isSelected = selectedCategory == cat,
-                            onClick = { selectedCategory = cat }
-                        )
-                    }
-                }
-            }
-
-            // App List Items
-            items(filteredList.size) { idx ->
-                val app = filteredList[idx]
-                val isBlocked = app.isFullyBlocked
-
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("app_item_${app.packageName}")
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
                             Text(
-                                text = app.appName,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "App Blocker",
+                                fontSize = if (isTablet) 30.sp else 26.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = GlassTokens.TextPrimary
                             )
                             Text(
-                                text = "${app.category} • ${if (isBlocked) "Locked in Focus Mode" else "Allowed"}",
-                                fontSize = 12.sp,
-                                color = if (isBlocked) GlassTokens.Danger else GlassTokens.TextSecondary
+                                text = "Choose applications to restrict during focus sessions",
+                                fontSize = if (isTablet) 14.sp else 12.sp,
+                                color = GlassTokens.TextSecondary
                             )
                         }
+                    }
+                }
 
-                        Switch(
-                            checked = isBlocked,
-                            onCheckedChange = { checked ->
-                                onToggleAppBlocked(app.packageName, app.appName, app.category, checked)
-                            },
-                            thumbContent = {
-                                Icon(
-                                    imageVector = if (isBlocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = GlassTokens.Danger,
-                                checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                // Search Bar
+                item {
+                    GlassTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = "Search installed applications...",
+                        testTagStr = "app_blocker_search_input"
+                    )
+                }
+
+                // Category Filter Chips
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(categories.size) { idx ->
+                            val cat = categories[idx]
+                            GlassChip(
+                                text = cat,
+                                isSelected = selectedCategory == cat,
+                                onClick = { selectedCategory = cat }
                             )
-                        )
+                        }
+                    }
+                }
+
+                // App List Items
+                if (isTablet) {
+                    // Tablet: 2-column grid via chunked rows
+                    val chunked = filteredList.chunked(2)
+                    items(chunked.size) { rowIdx ->
+                        val row = chunked[rowIdx]
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(sectionSpacing),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            row.forEach { app ->
+                                val isBlocked = app.isFullyBlocked
+                                GlassCard(
+                                    modifier = appItemModifier
+                                        .weight(1f)
+                                        .testTag("app_item_${app.packageName}")
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = app.appName,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = GlassTokens.TextPrimary
+                                            )
+                                            Text(
+                                                text = "${app.category} • ${if (isBlocked) "Locked in Focus Mode" else "Allowed"}",
+                                                fontSize = 12.sp,
+                                                color = if (isBlocked) GlassTokens.Danger else GlassTokens.TextSecondary
+                                            )
+                                        }
+
+                                        Switch(
+                                            checked = isBlocked,
+                                            onCheckedChange = { checked ->
+                                                onToggleAppBlocked(app.packageName, app.appName, app.category, checked)
+                                            },
+                                            thumbContent = {
+                                                Icon(
+                                                    imageVector = if (isBlocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = GlassTokens.Danger,
+                                                checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            // Fill remaining space if odd number of items
+                            if (row.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                } else {
+                    // Phone: single-column list
+                    items(filteredList.size) { idx ->
+                        val app = filteredList[idx]
+                        val isBlocked = app.isFullyBlocked
+
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("app_item_${app.packageName}")
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = app.appName,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GlassTokens.TextPrimary
+                                    )
+                                    Text(
+                                        text = "${app.category} • ${if (isBlocked) "Locked in Focus Mode" else "Allowed"}",
+                                        fontSize = 12.sp,
+                                        color = if (isBlocked) GlassTokens.Danger else GlassTokens.TextSecondary
+                                    )
+                                }
+
+                                Switch(
+                                    checked = isBlocked,
+                                    onCheckedChange = { checked ->
+                                        onToggleAppBlocked(app.packageName, app.appName, app.category, checked)
+                                    },
+                                    thumbContent = {
+                                        Icon(
+                                            imageVector = if (isBlocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = GlassTokens.Danger,
+                                        checkedTrackColor = GlassTokens.Danger.copy(alpha = 0.3f)
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }

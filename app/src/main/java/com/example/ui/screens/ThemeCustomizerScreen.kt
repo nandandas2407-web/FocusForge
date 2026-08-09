@@ -3,6 +3,7 @@
 // PURPOSE: Theme Customizer & Settings screen for Liquid Glass design,
 //          wallpapers, glass blur & opacity sliders, and permissions check panel.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — tablet-responsive layout with side-by-side preview & controls
 // ============================================================
 
 package com.example.ui.screens
@@ -14,7 +15,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
@@ -46,175 +46,256 @@ fun ThemeCustomizerScreen(
     var currentPreset by remember { mutableStateOf(themeSettings?.wallpaperPreset ?: "COSMIC_NEON") }
     var blurSigma by remember { mutableFloatStateOf(themeSettings?.glassBlurSigma ?: 24f) }
     var opacityVal by remember { mutableFloatStateOf(themeSettings?.glassOpacity ?: 0.15f) }
+    val isTablet = Responsive.isTablet()
 
     WallpaperBackground(preset = currentPreset) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
-                        contentDescription = null,
-                        tint = GlassTokens.Accent,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Liquid Glass & Theme",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = GlassTokens.TextPrimary
-                        )
-                        Text(
-                            text = "Customize frosted glass refraction, blur, and wallpapers",
-                            fontSize = 12.sp,
-                            color = GlassTokens.TextSecondary
-                        )
-                    }
-                }
-            }
-
-            // Live Preview Card
-            item {
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("theme_live_preview_card")
-                ) {
-                    Text(
-                        text = "Live Glass Preview",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTokens.TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Adjust the sliders below to fine-tune the ambient backdrop and card transparency.",
-                        fontSize = 13.sp,
-                        color = GlassTokens.TextSecondary
-                    )
-                }
-            }
-
-            // Wallpaper Preset Selection
-            item {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Ambient Wallpaper Backdrop",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTokens.TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PresetChip("Cosmic Neon", currentPreset == "COSMIC_NEON", Modifier.weight(1f)) {
-                            currentPreset = "COSMIC_NEON"
-                            onUpdateWallpaperPreset("COSMIC_NEON")
-                        }
-                        PresetChip("Lo-Fi Room", currentPreset == "LOFI_STUDY", Modifier.weight(1f)) {
-                            currentPreset = "LOFI_STUDY"
-                            onUpdateWallpaperPreset("LOFI_STUDY")
-                        }
-                        PresetChip("Aurora Glass", currentPreset == "AURORA", Modifier.weight(1f)) {
-                            currentPreset = "AURORA"
-                            onUpdateWallpaperPreset("AURORA")
-                        }
-                    }
-                }
-            }
-
-            // Glass Refraction Blur Slider
-            item {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Glass Blur Intensity: ${blurSigma.toInt()} px",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTokens.TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Slider(
-                        value = blurSigma,
-                        onValueChange = {
-                            blurSigma = it
-                            onUpdateGlassBlur(it)
-                        },
-                        valueRange = 8f..48f,
-                        colors = SliderDefaults.colors(
-                            thumbColor = GlassTokens.Info,
-                            activeTrackColor = GlassTokens.Info
-                        )
-                    )
-                }
-            }
-
-            // Glass Opacity Slider
-            item {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Glass Surface Opacity: ${(opacityVal * 100).toInt()}%",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTokens.TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Slider(
-                        value = opacityVal,
-                        onValueChange = {
-                            opacityVal = it
-                            onUpdateGlassOpacity(it)
-                        },
-                        valueRange = 0.05f..0.35f,
-                        colors = SliderDefaults.colors(
-                            thumbColor = GlassTokens.Accent,
-                            activeTrackColor = GlassTokens.Accent
-                        )
-                    )
-                }
-            }
-
-            // System Permissions Settings Panel
-            item {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
+        ResponsiveScaffold {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(Responsive.sectionSpacing())
+            ) {
+                item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Shield,
+                            imageVector = Icons.Default.Palette,
                             contentDescription = null,
-                            tint = GlassTokens.Info,
-                            modifier = Modifier.size(28.dp)
+                            tint = GlassTokens.Accent,
+                            modifier = Modifier.size(if (isTablet) 36.dp else 32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column {
                             Text(
-                                text = "System Permissions Panel",
-                                fontSize = 16.sp,
+                                text = "Liquid Glass & Theme",
+                                fontSize = if (isTablet) 30.sp else 26.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = GlassTokens.TextPrimary
                             )
                             Text(
-                                text = "One-tap shortcuts to Android Settings",
-                                fontSize = 12.sp,
+                                text = "Customize frosted glass refraction, blur, and wallpapers",
+                                fontSize = if (isTablet) 14.sp else 12.sp,
                                 color = GlassTokens.TextSecondary
                             )
                         }
-                        Button(
-                            onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
-                            colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent)
-                        ) {
-                            Text("Open", fontSize = 12.sp)
-                        }
                     }
                 }
+
+                if (isTablet) {
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Responsive.sectionSpacing())
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                GlassCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("theme_live_preview_card")
+                                ) {
+                                    Text(
+                                        text = "Live Glass Preview",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GlassTokens.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Adjust the sliders below to fine-tune the ambient backdrop and card transparency.",
+                                        fontSize = 14.sp,
+                                        color = GlassTokens.TextSecondary
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                WallpaperPresetSelection(
+                                    currentPreset = currentPreset,
+                                    onPresetSelected = { preset ->
+                                        currentPreset = preset
+                                        onUpdateWallpaperPreset(preset)
+                                    }
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                GlassSliderCard(
+                                    title = "Glass Blur Intensity: ${blurSigma.toInt()} px",
+                                    value = blurSigma,
+                                    valueRange = 8f..48f,
+                                    onValueChange = {
+                                        blurSigma = it
+                                        onUpdateGlassBlur(it)
+                                    },
+                                    trackColor = GlassTokens.Info
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                GlassSliderCard(
+                                    title = "Glass Surface Opacity: ${(opacityVal * 100).toInt()}%",
+                                    value = opacityVal,
+                                    valueRange = 0.05f..0.35f,
+                                    onValueChange = {
+                                        opacityVal = it
+                                        onUpdateGlassOpacity(it)
+                                    },
+                                    trackColor = GlassTokens.Accent
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                PermissionsPanel()
+                            }
+                        }
+                    }
+                } else {
+                    item {
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("theme_live_preview_card")
+                        ) {
+                            Text(
+                                text = "Live Glass Preview",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GlassTokens.TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Adjust the sliders below to fine-tune the ambient backdrop and card transparency.",
+                                fontSize = 13.sp,
+                                color = GlassTokens.TextSecondary
+                            )
+                        }
+                    }
+
+                    item {
+                        WallpaperPresetSelection(
+                            currentPreset = currentPreset,
+                            onPresetSelected = { preset ->
+                                currentPreset = preset
+                                onUpdateWallpaperPreset(preset)
+                            }
+                        )
+                    }
+
+                    item {
+                        GlassSliderCard(
+                            title = "Glass Blur Intensity: ${blurSigma.toInt()} px",
+                            value = blurSigma,
+                            valueRange = 8f..48f,
+                            onValueChange = {
+                                blurSigma = it
+                                onUpdateGlassBlur(it)
+                            },
+                            trackColor = GlassTokens.Info
+                        )
+                    }
+
+                    item {
+                        GlassSliderCard(
+                            title = "Glass Surface Opacity: ${(opacityVal * 100).toInt()}%",
+                            value = opacityVal,
+                            valueRange = 0.05f..0.35f,
+                            onValueChange = {
+                                opacityVal = it
+                                onUpdateGlassOpacity(it)
+                            },
+                            trackColor = GlassTokens.Accent
+                        )
+                    }
+
+                    item {
+                        PermissionsPanel()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WallpaperPresetSelection(
+    currentPreset: String,
+    onPresetSelected: (String) -> Unit
+) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Ambient Wallpaper Backdrop",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = GlassTokens.TextPrimary
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            PresetChip("Cosmic Neon", currentPreset == "COSMIC_NEON", Modifier.weight(1f)) {
+                onPresetSelected("COSMIC_NEON")
+            }
+            PresetChip("Lo-Fi Room", currentPreset == "LOFI_STUDY", Modifier.weight(1f)) {
+                onPresetSelected("LOFI_STUDY")
+            }
+            PresetChip("Aurora Glass", currentPreset == "AURORA", Modifier.weight(1f)) {
+                onPresetSelected("AURORA")
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlassSliderCard(
+    title: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+    trackColor: Color
+) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = GlassTokens.TextPrimary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            colors = SliderDefaults.colors(
+                thumbColor = trackColor,
+                activeTrackColor = trackColor
+            )
+        )
+    }
+}
+
+@Composable
+private fun PermissionsPanel() {
+    val context = LocalContext.current
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Shield,
+                contentDescription = null,
+                tint = GlassTokens.Info,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "System Permissions Panel",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GlassTokens.TextPrimary
+                )
+                Text(
+                    text = "One-tap shortcuts to Android Settings",
+                    fontSize = 12.sp,
+                    color = GlassTokens.TextSecondary
+                )
+            }
+            Button(
+                onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent)
+            ) {
+                Text("Open", fontSize = 12.sp)
             }
         }
     }

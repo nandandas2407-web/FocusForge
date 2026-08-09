@@ -3,13 +3,13 @@
 // PURPOSE: First-launch onboarding flow with permission setup (Accessibility,
 //          Usage Stats, Overlay, Notifications) and goal picker.
 // CREATED: 2026-08-09
+// UPDATED: 2026-08-09 — tablet-responsive layout
 // ============================================================
 
 package com.example.ui.screens
 
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,104 +32,110 @@ fun OnboardingScreen(
 ) {
     val context = LocalContext.current
     var step by remember { mutableIntStateOf(1) }
+    val isTablet = Responsive.isTablet()
+    val horizontalPadding = Responsive.horizontalPadding()
 
     WallpaperBackground(preset = "COSMIC_NEON") {
-        Box(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            when (step) {
-                1 -> {
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.Shield,
-                                contentDescription = null,
-                                tint = GlassTokens.Info,
-                                modifier = Modifier.size(64.dp)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Welcome to FocusForge",
-                                fontSize = 26.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = GlassTokens.TextPrimary,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Reclaim your screen time with Liquid Glass dark design, Reels/Shorts Blocker, and Pomodoro study tools.",
-                                fontSize = 14.sp,
-                                color = GlassTokens.TextSecondary,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(28.dp))
-                            GlassButton(
-                                text = "Get Started",
-                                onClick = { step = 2 },
-                                modifier = Modifier.fillMaxWidth(),
-                                icon = Icons.Default.ArrowForward,
-                                testTagStr = "onboarding_next_button"
-                            )
+        ResponsiveScaffold {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                when (step) {
+                    1 -> {
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    tint = GlassTokens.Info,
+                                    modifier = Modifier.size(if (isTablet) 80.dp else 64.dp)
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                Text(
+                                    text = "Welcome to FocusForge",
+                                    fontSize = if (isTablet) 32.sp else 26.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GlassTokens.TextPrimary,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Reclaim your screen time with Liquid Glass dark design, Reels/Shorts Blocker, and Pomodoro study tools.",
+                                    fontSize = if (isTablet) 16.sp else 14.sp,
+                                    color = GlassTokens.TextSecondary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.widthIn(max = if (isTablet) 480.dp else Dp.Unspecified)
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
+                                GlassButton(
+                                    text = "Get Started",
+                                    onClick = { step = 2 },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    icon = Icons.Default.ArrowForward,
+                                    testTagStr = "onboarding_next_button"
+                                )
+                            }
                         }
                     }
-                }
-                2 -> {
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column {
-                            Text(
-                                text = "Enable System Permissions",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = GlassTokens.TextPrimary
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "FocusForge uses native Android Accessibility & Usage access to block distractions directly on your device.",
-                                fontSize = 13.sp,
-                                color = GlassTokens.TextSecondary
-                            )
-                            Spacer(modifier = Modifier.height(20.dp))
+                    2 -> {
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Column {
+                                Text(
+                                    text = "Enable System Permissions",
+                                    fontSize = if (isTablet) 26.sp else 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GlassTokens.TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "FocusForge uses native Android Accessibility & Usage access to block distractions directly on your device.",
+                                    fontSize = if (isTablet) 14.sp else 13.sp,
+                                    color = GlassTokens.TextSecondary
+                                )
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
 
-                            PermissionItem(
-                                title = "Accessibility Service",
-                                description = "Required to detect Instagram Reels, YouTube Shorts & blocked apps",
-                                icon = Icons.Default.AccessibilityNew,
-                                onClick = {
-                                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                                }
-                            )
+                                PermissionItem(
+                                    title = "Accessibility Service",
+                                    description = "Required to detect Instagram Reels, YouTube Shorts & blocked apps",
+                                    icon = Icons.Default.AccessibilityNew,
+                                    onClick = {
+                                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                                    }
+                                )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
-                            PermissionItem(
-                                title = "Usage Stats Access",
-                                description = "Required to generate screen time analytics & dashboards",
-                                icon = Icons.Default.Analytics,
-                                onClick = {
-                                    context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                                }
-                            )
+                                PermissionItem(
+                                    title = "Usage Stats Access",
+                                    description = "Required to generate screen time analytics & dashboards",
+                                    icon = Icons.Default.Analytics,
+                                    onClick = {
+                                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                                    }
+                                )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
-                            PermissionItem(
-                                title = "Display Over Other Apps",
-                                description = "Required to show liquid glass block overlays",
-                                icon = Icons.Default.Layers,
-                                onClick = {
-                                    context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
-                                }
-                            )
+                                PermissionItem(
+                                    title = "Display Over Other Apps",
+                                    description = "Required to show liquid glass block overlays",
+                                    icon = Icons.Default.Layers,
+                                    onClick = {
+                                        context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+                                    }
+                                )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(Responsive.sectionSpacing()))
 
-                            GlassButton(
-                                text = "Continue to App",
-                                onClick = onFinishOnboarding,
-                                modifier = Modifier.fillMaxWidth(),
-                                testTagStr = "onboarding_finish_button"
-                            )
+                                GlassButton(
+                                    text = "Continue to App",
+                                    onClick = onFinishOnboarding,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    testTagStr = "onboarding_finish_button"
+                                )
+                            }
                         }
                     }
                 }
@@ -145,32 +151,33 @@ private fun PermissionItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit
 ) {
+    val isTablet = Responsive.isTablet()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = Color.White.copy(alpha = 0.08f)
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(if (isTablet) 18.dp else 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = GlassTokens.Accent,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    fontSize = 15.sp,
+                    fontSize = if (isTablet) 17.sp else 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = GlassTokens.TextPrimary
                 )
                 Text(
                     text = description,
-                    fontSize = 11.sp,
+                    fontSize = if (isTablet) 13.sp else 11.sp,
                     color = GlassTokens.TextSecondary
                 )
             }
@@ -180,7 +187,7 @@ private fun PermissionItem(
                 colors = ButtonDefaults.buttonColors(containerColor = GlassTokens.Accent),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Enable", fontSize = 12.sp)
+                Text("Enable", fontSize = if (isTablet) 13.sp else 12.sp)
             }
         }
     }
