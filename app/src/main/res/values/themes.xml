@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.FocusForge" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.FocusForge" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/bg_primary</item>
         <item name="android:statusBarColor">@color/bg_primary</item>
         <item name="android:navigationBarColor">@color/bg_primary</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorPrimaryVariant">@color/gold_dark</item>
+        <item name="colorOnPrimary">@color/bg_primary</item>
+        <item name="colorSecondary">@color/gold</item>
+        <item name="colorOnSecondary">@color/bg_primary</item>
+        <item name="bottomNavigationStyle">@style/Widget.FocusForge.BottomNav</item>
+    </style>
+
+    <style name="Widget.FocusForge.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="backgroundTint">@color/bg_secondary</item>
+        <item name="itemIconTint">@color/gold</item>
+        <item name="itemTextColor">@color/gold</item>
     </style>
 </resources>
