@@ -7,26 +7,22 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".MainApplication"
         android:label="FocusForge"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
-        android:theme="@style/AppTheme"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FocusForge">
 
+        <!-- Main Activity (for app icon) -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.focusforge.native.MainActivity"
             android:label="FocusForge"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.FocusForge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -35,7 +31,7 @@
 
         <!-- Accessibility Service -->
         <service
-            android:name=".FocusForgeAccessibilityService"
+            android:name="com.focusforge.native.FocusForgeAccessibilityService"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -48,29 +44,15 @@
 
         <!-- Block Overlay Service -->
         <service
-            android:name=".BlockOverlayService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse" />
+            android:name="com.focusforge.native.BlockOverlayService"
+            android:exported="false" />
 
         <!-- Boot Completed Receiver -->
         <receiver
-            android:name=".BootCompletedReceiver"
+            android:name="com.focusforge.native.BootCompletedReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Device Admin Receiver -->
-        <receiver
-            android:name=".FocusDeviceAdminReceiver"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin_policies" />
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
 

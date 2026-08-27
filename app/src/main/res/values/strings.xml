@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FocusForge</string>
+    <string name="accessibility_service_description">FocusForge uses accessibility services to detect and block distracting apps, YouTube Shorts, Instagram Reels, and enforce YouTube Study Mode.</string>
+</resources>
