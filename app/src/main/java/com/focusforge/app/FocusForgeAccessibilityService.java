@@ -359,7 +359,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         if (node == null || depth > 8) return;
         try {
             CharSequence viewId = node.getViewIdResourceName();
-            if (viewId != null) sb.append(" ").append(viewId.toLowerCase());
+            if (viewId != null) sb.append(" ").append(viewId.toString().toLowerCase());
             for (int i = 0; i < node.getChildCount(); i++) {
                 AccessibilityNodeInfo child = node.getChild(i);
                 if (child != null) {
