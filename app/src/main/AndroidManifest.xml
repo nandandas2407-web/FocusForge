@@ -19,7 +19,7 @@
 
         <!-- Main Activity (for app icon) -->
         <activity
-            android:name="com.focusforge.native.MainActivity"
+            android:name="com.focusforge.app.MainActivity"
             android:label="FocusForge"
             android:exported="true"
             android:theme="@style/Theme.FocusForge">
@@ -31,7 +31,7 @@
 
         <!-- Accessibility Service -->
         <service
-            android:name="com.focusforge.native.FocusForgeAccessibilityService"
+            android:name="com.focusforge.app.FocusForgeAccessibilityService"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -44,12 +44,12 @@
 
         <!-- Block Overlay Service -->
         <service
-            android:name="com.focusforge.native.BlockOverlayService"
+            android:name="com.focusforge.app.BlockOverlayService"
             android:exported="false" />
 
         <!-- Boot Completed Receiver -->
         <receiver
-            android:name="com.focusforge.native.BootCompletedReceiver"
+            android:name="com.focusforge.app.BootCompletedReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

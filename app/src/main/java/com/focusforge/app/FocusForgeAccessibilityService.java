@@ -1,4 +1,4 @@
-package com.focusforge.native;
+package com.focusforge.app;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -27,22 +27,6 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
 
     private static final String TAG = "FocusForge";
     private static FocusForgeAccessibilityService instance;
-
-    // Blocked app packages
-    private Set<String> blockedPackages = new HashSet<>();
-    private Set<String> reelsBlockedPackages = new HashSet<>();
-    private Set<String> shortsBlockedPackages = new HashSet<>();
-
-    // YouTube Study Mode
-    private boolean youtubeStudyModeEnabled = false;
-    private Set<String> youtubeWhitelistChannels = new HashSet<>();
-    private Set<String> youtubeWhitelistHandles = new HashSet<>();
-
-    // Website blocker
-    private Set<String> blockedDomains = new HashSet<>();
-
-    // Master switch
-    private boolean globalBlockerEnabled = true;
 
     // Browser packages
     private static final Set<String> BROWSER_PACKAGES = new HashSet<>(Arrays.asList(
@@ -74,7 +58,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (!globalBlockerEnabled) return;
+        if (!FocusForgeConfig.globalBlockerEnabled) return;
         if (event == null) return;
 
         int eventType = event.getEventType();
@@ -97,7 +81,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
 
         // 1. Full app block
-        if (blockedPackages.contains(packageName)) {
+        if (FocusForgeConfig.blockedPackages.contains(packageName)) {
             Log.d(TAG, "BLOCKED app: " + packageName);
             performGlobalAction(GLOBAL_ACTION_HOME);
             showOverlay(packageName, "App blocked by FocusForge");
@@ -105,7 +89,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 2. Instagram Reels
-        if ("com.instagram.android".equals(packageName) && reelsBlockedPackages.contains(packageName)) {
+        if ("com.instagram.android".equals(packageName) && FocusForgeConfig.reelsBlockedPackages.contains(packageName)) {
             if (detectInstagramReels(rootNode)) {
                 Log.d(TAG, "BLOCKED Instagram Reels");
                 performGlobalAction(GLOBAL_ACTION_BACK);
@@ -115,7 +99,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 3. YouTube Shorts
-        if ("com.google.android.youtube".equals(packageName) && shortsBlockedPackages.contains(packageName)) {
+        if ("com.google.android.youtube".equals(packageName) && FocusForgeConfig.shortsBlockedPackages.contains(packageName)) {
             if (detectYoutubeShorts(rootNode)) {
                 Log.d(TAG, "BLOCKED YouTube Shorts");
                 performGlobalAction(GLOBAL_ACTION_BACK);
@@ -125,7 +109,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 4. YouTube Study Mode
-        if ("com.google.android.youtube".equals(packageName) && youtubeStudyModeEnabled) {
+        if ("com.google.android.youtube".equals(packageName) && FocusForgeConfig.youtubeStudyModeEnabled) {
             BlockDecision decision = evaluateYoutubeStudyMode(rootNode);
             if (decision != null) {
                 Log.d(TAG, "YouTube Study Mode: " + decision.reason);
@@ -140,7 +124,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 5. Website blocker
-        if (BROWSER_PACKAGES.contains(packageName) && !blockedDomains.isEmpty()) {
+        if (BROWSER_PACKAGES.contains(packageName) && !FocusForgeConfig.blockedDomains.isEmpty()) {
             String blockedDomain = checkWebsiteBlocks(rootNode);
             if (blockedDomain != null) {
                 Log.d(TAG, "BLOCKED website: " + blockedDomain);
@@ -247,7 +231,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
 
             boolean isWhitelisted = false;
             if (channelName != null) {
-                for (String whitelist : youtubeWhitelistChannels) {
+                for (String whitelist : FocusForgeConfig.youtubeWhitelistChannels) {
                     if (normalize(channelName).contains(normalize(whitelist)) ||
                         normalize(whitelist).contains(normalize(channelName))) {
                         isWhitelisted = true;
@@ -256,7 +240,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
                 }
             }
             if (!isWhitelisted && channelHandle != null) {
-                for (String handle : youtubeWhitelistHandles) {
+                for (String handle : FocusForgeConfig.youtubeWhitelistHandles) {
                     if (normalize(channelHandle).equals(normalize(handle))) {
                         isWhitelisted = true;
                         break;
@@ -318,7 +302,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         if (rootNode == null) return null;
 
         String joined = getAllTextJoined(rootNode).toLowerCase();
-        for (String domain : blockedDomains) {
+        for (String domain : FocusForgeConfig.blockedDomains) {
             String cleanDomain = domain.toLowerCase()
                 .replaceFirst("^https?://", "")
                 .replaceFirst("^www\\.", "");
@@ -418,37 +402,6 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         } else {
             startService(intent);
         }
-    }
-
-    // ── Public API for React Native ─────────────────────────────────
-
-    public void setBlockedPackages(Set<String> packages) {
-        this.blockedPackages = packages;
-    }
-
-    public void setReelsBlockedPackages(Set<String> packages) {
-        this.reelsBlockedPackages = packages;
-    }
-
-    public void setShortsBlockedPackages(Set<String> packages) {
-        this.shortsBlockedPackages = packages;
-    }
-
-    public void setYoutubeStudyMode(boolean enabled) {
-        this.youtubeStudyModeEnabled = enabled;
-    }
-
-    public void setYoutubeWhitelist(Set<String> channels, Set<String> handles) {
-        this.youtubeWhitelistChannels = channels;
-        this.youtubeWhitelistHandles = handles;
-    }
-
-    public void setBlockedDomains(Set<String> domains) {
-        this.blockedDomains = domains;
-    }
-
-    public void setGlobalBlockerEnabled(boolean enabled) {
-        this.globalBlockerEnabled = enabled;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.focusforge.native;
+package com.focusforge.app;
 
 import android.app.Activity;
 import android.content.Intent;

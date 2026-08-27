@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.focusforge.native'
+    namespace 'com.focusforge.app'
     compileSdk 34
 
     defaultConfig {
