@@ -7,9 +7,8 @@
 **The Android focus suite that blocks distractions at the system level.**
 Reels. Shorts. Mindless scrolling. Gone.
 
-Liquid Glass UI · Pomodoro Timer · App Blocker · YouTube Study Mode · Tasks & Calendar
+Premium Gold UI · React Native · Pomodoro Timer · App Blocker · YouTube Study Mode · Tasks & Calendar
 
-[![Build APK](https://github.com/nandandas2407-web/FocusForge/actions/workflows/build-apk.yml/badge.svg)](https://github.com/nandandas2407-web/FocusForge/actions/workflows/build-apk.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://developer.android.com/about/versions/nougat)
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84.svg)](https://developer.android.com)
@@ -20,9 +19,9 @@ Liquid Glass UI · Pomodoro Timer · App Blocker · YouTube Study Mode · Tasks 
 
 ## What is FocusForge?
 
-FocusForge is a **native Android focus & study app** that blocks distracting content at the **system accessibility level** — not just a launcher overlay or a VPN trick. It uses Android's `AccessibilityService` to intercept foreground app events in real time and block content before it loads.
+FocusForge is a **React Native focus & study app** that blocks distracting content at the **system accessibility level** — not just a launcher overlay or a VPN trick. It uses Android's `AccessibilityService` via a native bridge module to intercept foreground app events in real time and block content before it loads.
 
-If you're a student, knowledge worker, or anyone trying to deep focus, FocusForge kills the scroll loop before it starts.
+v2.0 features a **premium gold/amber color scheme** with deep obsidian backgrounds, replacing the previous purple theme.
 
 ---
 
@@ -39,9 +38,18 @@ If you're a student, knowledge worker, or anyone trying to deep focus, FocusForg
 | **Website Blocker** | Block domains in any browser (Chrome, Firefox, Brave, Edge, Samsung, Opera). |
 | **Uninstall Protection** | Device Admin receiver prevents casual uninstallation during focus sessions. |
 
-### YouTube Study Mode — Deep Dive
+### YouTube Shorts Blocking — Fixed
 
-This isn't a keyword filter. FocusForge builds a **screen snapshot** from the full accessibility tree:
+The Shorts detection uses a **multi-signal approach**:
+
+1. **Resource ID detection** — checks for `reel_player`, `shorts_player`, `ytd-reel` containers
+2. **UI element detection** — looks for Shorts-specific actions (remix, use this sound, original audio)
+3. **Navigation absence** — Shorts screens lack the main YouTube nav bar
+4. **Fail-closed** — if detection is ambiguous, content is blocked
+
+### YouTube Study Mode — Fixed
+
+The Study Mode uses a **screen snapshot approach**:
 
 ```
 YouTube opened
@@ -49,7 +57,7 @@ YouTube opened
 Study Mode enabled?
     ↓ YES
 Screen snapshot built from ALL accessibility properties:
-  • text, contentDescription, viewIdResourceName, className
+  • text, contentDescription, viewIdResourceName
     ↓
 Screen type detected: WATCH / SHORTS / HOME / SEARCH / CHANNEL
     ↓
@@ -75,14 +83,7 @@ Screen type detected: WATCH / SHORTS / HOME / SEARCH / CHANNEL
 | **Study Calendar** | Event tracking with exam countdown cards and study block scheduling |
 | **Streak Tracker** | Daily screen time goals with streak flame tracking and milestone badges |
 | **Screen Time Stats** | Per-app usage analytics with time reclaimed breakdown |
-| **Theme Customizer** | Liquid Glass UI with blur/opacity sliders, wallpaper presets, and accent colors |
-
-### UI Design
-
-- **Liquid Glass** dark theme with real-time blur and transparency
-- Adaptive layout: phone (bottom nav) + tablet (side rail)
-- Wallpaper presets: Cosmic Neon, Lo-Fi Study, Aurora, Custom
-- Onboarding flow with permission guidance
+| **Theme Customizer** | Premium gold theme with accent color options |
 
 ---
 
@@ -91,37 +92,24 @@ Screen type detected: WATCH / SHORTS / HOME / SEARCH / CHANNEL
 ```
 ┌──────────────────────────────────────────────────────┐
 │                    Presentation                      │
-│  Jetpack Compose · Material 3 · Navigation          │
-│  ViewModels (StateFlow) · Adaptive Phone/Tablet      │
+│  React Native · Expo · React Navigation             │
+│  Zustand (State) · React Native SVG                 │
 ├──────────────────────────────────────────────────────┤
-│                     Domain                           │
-│  AppDetectionRules · YoutubeScreenSnapshot           │
-│  BlockDecision (sealed class) · Channel Matching     │
+│                   Native Bridge                     │
+│  FocusForgeModule (React → Android)                 │
+│  setBlockedApps() · setYoutubeStudyMode()           │
+│  setYoutubeWhitelist() · setBlockedWebsites()       │
 ├──────────────────────────────────────────────────────┤
-│                      Data                           │
-│  Room DB · DAO (Flow queries) · Repositories        │
-│  Entities: BlockedApp, FocusSession, Task, Calendar  │
+│                Native Android Layer                 │
+│  FocusForgeAccessibilityService                     │
+│  BlockOverlayService · BootCompletedReceiver        │
+│  FocusDeviceAdminReceiver                           │
 ├──────────────────────────────────────────────────────┤
 │                   Services                          │
-│  FocusAccessibilityService  ←→  BlockOverlayService │
-│  FocusDeviceAdminReceiver   ←→  BootCompletedRecv   │
+│  AccessibilityEvent → Screen Snapshot → Block决策   │
+│  YouTube Study Mode · Shorts Detection              │
+│  Reels Detection · Website Blocker                  │
 └──────────────────────────────────────────────────────┘
-```
-
-### Blocking Flow
-
-```
-AccessibilityEvent received
-    ↓
-FocusAccessibilityService.onAccessibilityEvent()
-    ↓
-AppDetectionRules.evaluate()
-    ├─ Full app block?        → GLOBAL_ACTION_HOME
-    ├─ Instagram Reels?       → GLOBAL_ACTION_BACK + overlay
-    ├─ YouTube Shorts?        → GLOBAL_ACTION_BACK + overlay
-    ├─ YouTube Study Mode?    → Screen snapshot → channel match → BACK/HOME
-    ├─ Website blocked?       → GLOBAL_ACTION_BACK + overlay
-    └─ Allowed?              → no-op
 ```
 
 ---
@@ -130,19 +118,15 @@ AppDetectionRules.evaluate()
 
 | Layer | Technology |
 |---|---|
-| **Language** | Kotlin |
-| **UI** | Jetpack Compose + Material 3 |
-| **Architecture** | MVVM (ViewModel + StateFlow + Room) |
-| **Database** | Room (SQLite) with reactive Flows |
-| **Navigation** | Jetpack Navigation Compose |
-| **DI** | Manual (ViewModel factories) |
-| **Networking** | OkHttp + Retrofit + Moshi |
-| **Image Loading** | Coil Compose |
-| **Firebase** | Firebase AI (Gemini), App Check (reCAPTCHA) |
-| **Build** | Gradle 9.3.1, KSP, Version Catalog |
-| **CI/CD** | GitHub Actions (build + release) |
+| **Language** | TypeScript + Java (native modules) |
+| **UI** | React Native + Expo |
+| **State** | Zustand + AsyncStorage |
+| **Navigation** | React Navigation (Bottom Tabs) |
+| **Charts** | React Native SVG |
+| **Native** | Android AccessibilityService |
+| **Build** | Expo + Gradle |
 | **Min SDK** | 24 (Android 7.0) |
-| **Target SDK** | 36 |
+| **Target SDK** | 35 |
 
 ---
 
@@ -150,9 +134,9 @@ AppDetectionRules.evaluate()
 
 ### Prerequisites
 
+- [Node.js](https://nodejs.org/) 18+
 - [Android Studio](https://developer.android.com/studio) Ladybug or later
 - JDK 17+
-- Android SDK 36
 - A physical device recommended (accessibility services work better than emulators)
 
 ### Setup
@@ -162,17 +146,22 @@ AppDetectionRules.evaluate()
 git clone https://github.com/nandandas2407-web/FocusForge.git
 cd FocusForge
 
+# Install dependencies
+npm install
+
 # (Optional) Add Gemini API key for AI features
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY=your_key_here
 ```
 
 ### Build & Run
 
-1. Open the project in Android Studio
-2. Let Gradle sync and resolve dependencies
-3. Remove `signingConfig = signingConfigs.getByName("debugConfig")` from `app/build.gradle.kts` (line 49) for local debug builds
-4. Run on a device or emulator
+```bash
+# Start Expo
+npx expo start
+
+# Or build APK directly
+npx expo run:android
+```
 
 ### First Launch
 
@@ -183,67 +172,50 @@ cp .env.example .env
 
 ---
 
-## CI/CD
-
-### Automatic Builds
-
-GitHub Actions builds the APK on every push to `main` and on pull requests.
-
-| Workflow | Trigger | Output |
-|---|---|---|
-| `build-apk.yml` | Push to `main`, PRs, manual | Debug APK artifact |
-| `release-apk.yml` | Tag push (`v*`), manual | GitHub Release with APK |
-
-### Creating a Release
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-This triggers a release build and attaches the APK to a GitHub Release.
-
-### APK Artifact
-
-The debug APK is uploaded as `focusforge-debug-apk` in the Actions artifacts.
-
----
-
 ## Project Structure
 
 ```
 FocusForge/
-├── app/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/example/
-│   │   │   │   ├── MainActivity.kt              # Entry point, Compose nav
-│   │   │   │   ├── data/
-│   │   │   │   │   ├── entity/Entities.kt        # Room entities
-│   │   │   │   │   ├── dao/FocusDao.kt           # DAO interface
-│   │   │   │   │   ├── db/FocusDatabase.kt       # Room database
-│   │   │   │   │   └── repository/Repositories.kt
-│   │   │   │   ├── service/
-│   │   │   │   │   ├── AppDetectionRules.kt      # Blocking logic engine
-│   │   │   │   │   ├── FocusAccessibilityService.kt  # Core service
-│   │   │   │   │   ├── BlockOverlayService.kt    # Block notification overlay
-│   │   │   │   │   ├── FocusDeviceAdminReceiver.kt
-│   │   │   │   │   └── BootCompletedReceiver.kt
-│   │   │   │   └── ui/
-│   │   │   │       ├── screens/                  # 12 screen composables
-│   │   │   │       ├── theme/                    # Liquid Glass design system
-│   │   │   │       ├── components/               # Ambient sound player
-│   │   │   │       └── viewmodel/ViewModels.kt   # State management
-│   │   │   ├── res/                              # Resources, icons, configs
-│   │   │   └── AndroidManifest.xml
-│   │   └── test/                                 # Unit + screenshot tests
-│   └── build.gradle.kts
-├── gradle/
-│   └── libs.versions.toml                        # Version catalog
-├── .github/workflows/                            # CI/CD pipelines
-├── build.gradle.kts
-├── settings.gradle.kts
-└── metadata.json
+├── App.tsx                           # Entry point
+├── src/
+│   ├── theme/
+│   │   ├── colors.ts                 # Premium gold color palette
+│   │   └── theme.ts                  # Spacing, typography, shadows
+│   ├── navigation/
+│   │   └── AppNavigator.tsx          # Bottom tab navigation
+│   ├── screens/
+│   │   ├── HomeScreen.tsx            # Dashboard with timer + stats
+│   │   ├── BlockerScreen.tsx         # App/website blocking
+│   │   ├── PomodoroScreen.tsx        # Focus timer
+│   │   ├── TasksScreen.tsx           # Task manager
+│   │   ├── CalendarScreen.tsx        # Study calendar
+│   │   ├── YoutubeStudyScreen.tsx    # YouTube whitelist management
+│   │   ├── StatsScreen.tsx           # Analytics + streaks
+│   │   └── SettingsScreen.tsx        # Theme + settings
+│   ├── components/
+│   │   ├── GlassCard.tsx             # Premium card component
+│   │   ├── PremiumButton.tsx         # Themed button
+│   │   ├── PremiumHeader.tsx         # Screen header
+│   │   └── TimerDial.tsx             # Animated timer ring
+│   ├── store/
+│   │   └── useStore.ts              # Zustand state management
+│   └── services/
+│       └── blocking.ts              # Blocking logic (unused, native handles it)
+├── android/
+│   └── app/src/main/
+│       ├── AndroidManifest.xml       # Permissions + service declarations
+│       ├── java/com/focusforge/native/
+│       │   ├── FocusForgeAccessibilityService.java
+│       │   ├── FocusForgeModule.java # RN bridge
+│       │   ├── FocusForgePackage.java
+│       │   ├── BlockOverlayService.java
+│       │   ├── BootCompletedReceiver.java
+│       │   └── FocusDeviceAdminReceiver.java
+│       └── res/xml/
+│           ├── accessibility_service_config.xml
+│           └── device_admin_policies.xml
+├── package.json
+└── .env.example
 ```
 
 ---
@@ -259,54 +231,37 @@ FocusForge/
 | `QUERY_ALL_PACKAGES` | Lists installed apps for the blocker UI |
 | `PACKAGE_USAGE_STATS` | Screen time analytics |
 | `POST_NOTIFICATIONS` | Block overlay notifications |
-| `READ_MEDIA_IMAGES` | Custom wallpaper selection |
 | `BIND_DEVICE_ADMIN` | Uninstall protection (optional) |
 
 ---
 
-## Configuration
+## Default Configuration
 
-### Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `GEMINI_API_KEY` | No | Gemini API key for AI features |
-| `KEYSTORE_PATH` | Release builds | Path to upload keystore |
-| `STORE_PASSWORD` | Release builds | Keystore password |
-| `KEY_PASSWORD` | Release builds | Key password |
-
-### Default Whitelisted YouTube Channels
-
-These channels are pre-loaded in the YouTube Study Mode whitelist:
+### Whitelisted YouTube Channels
 
 - MIT OpenCourseWare
 - Kurzgesagt - In a Nutshell
 - freeCodeCamp.org
 
-Add your own via the YouTube Study Mode screen in the app.
+### Blocked Websites
 
-### Default Blocked Websites
+- reddit.com, twitter.com, x.com, tiktok.com
 
-- reddit.com
-- twitter.com / x.com
+### Default Blocked Apps
 
-Manage via the Website Blocker screen.
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- TikTok (fully blocked)
+- Twitter/X (fully blocked)
+- Reddit (fully blocked)
+- Netflix (fully blocked)
+- Twitch (fully blocked)
+- Instagram (Reels blocked, feed allowed)
+- YouTube (Shorts blocked, long-form allowed)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) file.
 
 ---
 
