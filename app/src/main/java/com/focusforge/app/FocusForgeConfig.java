@@ -13,6 +13,7 @@ public class FocusForgeConfig {
     public static Set<String> blockedPackages = new HashSet<>();
     public static Set<String> reelsBlockedPackages = new HashSet<>();
     public static Set<String> shortsBlockedPackages = new HashSet<>();
+    public static boolean reelsShortsBlockingEnabled = true;
     public static boolean youtubeStudyModeEnabled = false;
     public static Set<String> youtubeWhitelistChannels = new HashSet<>(Arrays.asList(
         "MIT OpenCourseWare",

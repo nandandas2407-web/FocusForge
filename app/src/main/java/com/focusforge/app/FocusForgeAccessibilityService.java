@@ -89,7 +89,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 2. Instagram Reels
-        if ("com.instagram.android".equals(packageName) && FocusForgeConfig.reelsBlockedPackages.contains(packageName)) {
+        if ("com.instagram.android".equals(packageName) && FocusForgeConfig.reelsShortsBlockingEnabled && FocusForgeConfig.reelsBlockedPackages.contains(packageName)) {
             if (detectInstagramReels(rootNode)) {
                 Log.d(TAG, "BLOCKED Instagram Reels");
                 performGlobalAction(GLOBAL_ACTION_BACK);
@@ -99,7 +99,7 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
         }
 
         // 3. YouTube Shorts
-        if ("com.google.android.youtube".equals(packageName) && FocusForgeConfig.shortsBlockedPackages.contains(packageName)) {
+        if ("com.google.android.youtube".equals(packageName) && FocusForgeConfig.reelsShortsBlockingEnabled && FocusForgeConfig.shortsBlockedPackages.contains(packageName)) {
             if (detectYoutubeShorts(rootNode)) {
                 Log.d(TAG, "BLOCKED YouTube Shorts");
                 performGlobalAction(GLOBAL_ACTION_BACK);
@@ -413,5 +413,9 @@ public class FocusForgeAccessibilityService extends AccessibilityService {
     public void onDestroy() {
         instance = null;
         super.onDestroy();
+    }
+
+    public static boolean isServiceEnabled() {
+        return instance != null;
     }
 }
