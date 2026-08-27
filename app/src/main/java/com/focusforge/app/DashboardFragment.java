@@ -50,8 +50,8 @@ public class DashboardFragment extends Fragment {
         switchShorts.setChecked(FocusForgeConfig.reelsShortsBlockingEnabled);
         switchShorts.setOnCheckedChangeListener((b, checked) -> FocusForgeConfig.reelsShortsBlockingEnabled = checked);
 
-        statApps.setText(String.valueOf(FocusForgeConfig.blockedPackages.length));
-        statSites.setText(String.valueOf(FocusForgeConfig.blockedDomains.length));
+        statApps.setText(String.valueOf(FocusForgeConfig.blockedPackages.size()));
+        statSites.setText(String.valueOf(FocusForgeConfig.blockedDomains.size()));
     }
 
     @Override
