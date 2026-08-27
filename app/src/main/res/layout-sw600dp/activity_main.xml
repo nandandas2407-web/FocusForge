@@ -6,7 +6,6 @@
     android:orientation="horizontal"
     android:background="@color/bg_primary">
 
-    <!-- Side Navigation for Tablets -->
     <LinearLayout
         android:layout_width="80dp"
         android:layout_height="match_parent"
@@ -67,7 +66,16 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_timer"
             android:padding="12dp"
+            android:layout_marginBottom="8dp"
             android:contentDescription="Timer" />
+
+        <ImageView
+            android:id="@+id/nav_permissions"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_perm"
+            android:padding="12dp"
+            android:contentDescription="Access" />
     </LinearLayout>
 
     <FrameLayout

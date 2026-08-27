@@ -3,7 +3,7 @@
     <item
         android:id="@+id/nav_dashboard"
         android:icon="@drawable/ic_dashboard"
-        android:title="Dashboard" />
+        android:title="Home" />
     <item
         android:id="@+id/nav_apps"
         android:icon="@drawable/ic_apps"
@@ -20,4 +20,8 @@
         android:id="@+id/nav_timer"
         android:icon="@drawable/ic_timer"
         android:title="Timer" />
+    <item
+        android:id="@+id/nav_permissions"
+        android:icon="@drawable/ic_perm"
+        android:title="Access" />
 </menu>

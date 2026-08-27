@@ -1,6 +1,5 @@
 package com.focusforge.app;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -10,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 public class DashboardFragment extends Fragment {
     private View statusDot;
@@ -21,13 +24,14 @@ public class DashboardFragment extends Fragment {
     private TextView statApps;
     private TextView statSites;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         statusDot = view.findViewById(R.id.statusDot);
@@ -40,15 +44,25 @@ public class DashboardFragment extends Fragment {
         statSites = view.findViewById(R.id.statSites);
 
         btnToggle.setOnClickListener(v -> {
-            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            startActivity(intent);
+            if (!isAccessibilityServiceEnabled()) {
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivity(intent);
+            } else {
+                FocusForgeConfig.globalBlockerEnabled = !FocusForgeConfig.globalBlockerEnabled;
+                FocusForgeConfig.save();
+                updateStatus();
+            }
         });
 
-        switchStudy.setChecked(FocusForgeConfig.youtubeStudyModeEnabled);
-        switchStudy.setOnCheckedChangeListener((b, checked) -> FocusForgeConfig.youtubeStudyModeEnabled = checked);
+        switchStudy.setOnCheckedChangeListener((b, checked) -> {
+            FocusForgeConfig.youtubeStudyModeEnabled = checked;
+            FocusForgeConfig.save();
+        });
 
-        switchShorts.setChecked(FocusForgeConfig.reelsShortsBlockingEnabled);
-        switchShorts.setOnCheckedChangeListener((b, checked) -> FocusForgeConfig.reelsShortsBlockingEnabled = checked);
+        switchShorts.setOnCheckedChangeListener((b, checked) -> {
+            FocusForgeConfig.reelsShortsBlockingEnabled = checked;
+            FocusForgeConfig.save();
+        });
 
         statApps.setText(String.valueOf(FocusForgeConfig.blockedPackages.size()));
         statSites.setText(String.valueOf(FocusForgeConfig.blockedDomains.size()));
@@ -61,17 +75,38 @@ public class DashboardFragment extends Fragment {
     }
 
     private void updateStatus() {
-        boolean enabled = FocusForgeAccessibilityService.isServiceEnabled();
+        if (!isAdded()) return;
+        boolean enabled = isAccessibilityServiceEnabled() && FocusForgeConfig.globalBlockerEnabled;
         if (enabled) {
             statusDot.setBackgroundResource(R.drawable.dot_green);
             statusText.setText("Protection Active");
             statusDetail.setText("FocusForge is blocking distractions");
-            btnToggle.setText("DISABLE PROTECTION");
+            btnToggle.setText("PAUSE PROTECTION");
+        } else if (isAccessibilityServiceEnabled()) {
+            statusDot.setBackgroundResource(R.drawable.dot_red);
+            statusText.setText("Protection Paused");
+            statusDetail.setText("Service is running but protection is paused");
+            btnToggle.setText("RESUME PROTECTION");
         } else {
             statusDot.setBackgroundResource(R.drawable.dot_red);
             statusText.setText("Protection Disabled");
-            statusDetail.setText("Enable accessibility service to block apps and content");
+            statusDetail.setText("Enable accessibility service to start blocking");
             btnToggle.setText("ENABLE PROTECTION");
         }
+        switchStudy.setChecked(FocusForgeConfig.youtubeStudyModeEnabled);
+        switchShorts.setChecked(FocusForgeConfig.reelsShortsBlockingEnabled);
+        statApps.setText(String.valueOf(FocusForgeConfig.blockedPackages.size()));
+        statSites.setText(String.valueOf(FocusForgeConfig.blockedDomains.size()));
+    }
+
+    private boolean isAccessibilityServiceEnabled() {
+        if (getActivity() == null) return false;
+        String serviceName = getActivity().getPackageName() + "/com.focusforge.app.FocusForgeAccessibilityService";
+        String enabledServices = Settings.Secure.getString(
+            getActivity().getContentResolver(),
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        );
+        if (enabledServices == null) return false;
+        return enabledServices.contains(serviceName);
     }
 }

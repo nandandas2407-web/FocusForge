@@ -1,6 +1,5 @@
 package com.focusforge.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -8,6 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import java.util.Locale;
 
 public class TimerFragment extends Fragment {
     private TextView timerText;
@@ -26,13 +31,19 @@ public class TimerFragment extends Fragment {
     private long breakTime = 5 * 60 * 1000;
     private int sessions = 0;
 
+    private static final String KEY_TIME_LEFT = "time_left";
+    private static final String KEY_IS_WORK = "is_work";
+    private static final String KEY_IS_RUNNING = "is_running";
+    private static final String KEY_SESSIONS = "sessions";
+
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_timer, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         timerText = view.findViewById(R.id.timerText);
@@ -43,24 +54,39 @@ public class TimerFragment extends Fragment {
         breakDuration = view.findViewById(R.id.breakDuration);
         sessionCount = view.findViewById(R.id.sessionCount);
 
+        if (savedInstanceState != null) {
+            timeLeft = savedInstanceState.getLong(KEY_TIME_LEFT, workTime);
+            isWork = savedInstanceState.getBoolean(KEY_IS_WORK, true);
+            isRunning = savedInstanceState.getBoolean(KEY_IS_RUNNING, false);
+            sessions = savedInstanceState.getInt(KEY_SESSIONS, 0);
+        }
+
         workDuration.setText((workTime / 60000) + " min");
         breakDuration.setText((breakTime / 60000) + " min");
         sessionCount.setText(String.valueOf(sessions));
 
         btnStart.setOnClickListener(v -> {
-            if (isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
+            if (isRunning) pauseTimer();
+            else startTimer();
         });
 
         btnReset.setOnClickListener(v -> resetTimer());
 
         updateDisplay();
+        if (isRunning) startTimer();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(KEY_TIME_LEFT, timeLeft);
+        outState.putBoolean(KEY_IS_WORK, isWork);
+        outState.putBoolean(KEY_IS_RUNNING, isRunning);
+        outState.putInt(KEY_SESSIONS, sessions);
     }
 
     private void startTimer() {
+        if (timer != null) timer.cancel();
         timer = new CountDownTimer(timeLeft, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -91,17 +117,13 @@ public class TimerFragment extends Fragment {
     }
 
     private void pauseTimer() {
-        if (timer != null) {
-            timer.cancel();
-        }
+        if (timer != null) timer.cancel();
         isRunning = false;
         btnStart.setText("RESUME");
     }
 
     private void resetTimer() {
-        if (timer != null) {
-            timer.cancel();
-        }
+        if (timer != null) timer.cancel();
         isRunning = false;
         isWork = true;
         timeLeft = workTime;
@@ -111,16 +133,15 @@ public class TimerFragment extends Fragment {
     }
 
     private void updateDisplay() {
+        if (!isAdded()) return;
         int minutes = (int) (timeLeft / 60000);
         int seconds = (int) (timeLeft / 1000) % 60;
-        timerText.setText(String.format("%02d:%02d", minutes, seconds));
+        timerText.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (timer != null) {
-            timer.cancel();
-        }
+        if (timer != null) timer.cancel();
     }
 }

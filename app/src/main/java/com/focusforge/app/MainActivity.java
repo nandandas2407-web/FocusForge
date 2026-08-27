@@ -1,17 +1,18 @@
 package com.focusforge.app;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
-    private ImageView navDashboard, navApps, navYoutube, navWebsites, navTimer;
+    private ImageView navDashboard, navApps, navYoutube, navWebsites, navTimer, navPermissions;
     private int selectedNav = R.id.nav_dashboard;
 
     @Override
@@ -25,6 +26,7 @@ public class MainActivity extends Activity {
         navYoutube = findViewById(R.id.nav_youtube);
         navWebsites = findViewById(R.id.nav_websites);
         navTimer = findViewById(R.id.nav_timer);
+        navPermissions = findViewById(R.id.nav_permissions);
 
         if (bottomNav != null) {
             bottomNav.setOnItemSelectedListener(item -> {
@@ -34,11 +36,12 @@ public class MainActivity extends Activity {
         }
 
         if (navDashboard != null) {
-            navDashboard.setOnClickListener(v -> { loadFragment(R.id.nav_dashboard); });
-            navApps.setOnClickListener(v -> { loadFragment(R.id.nav_apps); });
-            navYoutube.setOnClickListener(v -> { loadFragment(R.id.nav_youtube); });
-            navWebsites.setOnClickListener(v -> { loadFragment(R.id.nav_websites); });
-            navTimer.setOnClickListener(v -> { loadFragment(R.id.nav_timer); });
+            navDashboard.setOnClickListener(v -> loadFragment(R.id.nav_dashboard));
+            navApps.setOnClickListener(v -> loadFragment(R.id.nav_apps));
+            navYoutube.setOnClickListener(v -> loadFragment(R.id.nav_youtube));
+            navWebsites.setOnClickListener(v -> loadFragment(R.id.nav_websites));
+            navTimer.setOnClickListener(v -> loadFragment(R.id.nav_timer));
+            navPermissions.setOnClickListener(v -> loadFragment(R.id.nav_permissions));
         }
 
         if (savedInstanceState == null) {
@@ -49,19 +52,15 @@ public class MainActivity extends Activity {
     private void loadFragment(int navId) {
         selectedNav = navId;
         Fragment fragment = null;
-        if (navId == R.id.nav_dashboard) {
-            fragment = new DashboardFragment();
-        } else if (navId == R.id.nav_apps) {
-            fragment = new AppsFragment();
-        } else if (navId == R.id.nav_youtube) {
-            fragment = new YouTubeFragment();
-        } else if (navId == R.id.nav_websites) {
-            fragment = new WebsitesFragment();
-        } else if (navId == R.id.nav_timer) {
-            fragment = new TimerFragment();
-        }
+        if (navId == R.id.nav_dashboard) fragment = new DashboardFragment();
+        else if (navId == R.id.nav_apps) fragment = new AppsFragment();
+        else if (navId == R.id.nav_youtube) fragment = new YouTubeFragment();
+        else if (navId == R.id.nav_websites) fragment = new WebsitesFragment();
+        else if (navId == R.id.nav_timer) fragment = new TimerFragment();
+        else if (navId == R.id.nav_permissions) fragment = new PermissionsFragment();
+
         if (fragment != null) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_container, fragment);
             ft.commit();
         }
@@ -78,6 +77,7 @@ public class MainActivity extends Activity {
             navYoutube.setSelected(selectedNav == R.id.nav_youtube);
             navWebsites.setSelected(selectedNav == R.id.nav_websites);
             navTimer.setSelected(selectedNav == R.id.nav_timer);
+            if (navPermissions != null) navPermissions.setSelected(selectedNav == R.id.nav_permissions);
         }
     }
 }

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permissions -->
-    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="FocusForge"
@@ -15,11 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FocusForge">
+        android:theme="@style/Theme.FocusForge"
+        android:name=".FocusForgeApp">
 
-        <!-- Main Activity (for app icon) -->
         <activity
-            android:name="com.focusforge.app.MainActivity"
+            android:name=".MainActivity"
             android:label="FocusForge"
             android:exported="true"
             android:theme="@style/Theme.FocusForge">
@@ -29,9 +28,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Accessibility Service -->
         <service
-            android:name="com.focusforge.app.FocusForgeAccessibilityService"
+            android:name=".FocusForgeAccessibilityService"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -42,14 +40,13 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!-- Block Overlay Service -->
         <service
-            android:name="com.focusforge.app.BlockOverlayService"
-            android:exported="false" />
+            android:name=".BlockOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
 
-        <!-- Boot Completed Receiver -->
         <receiver
-            android:name="com.focusforge.app.BootCompletedReceiver"
+            android:name=".BootCompletedReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

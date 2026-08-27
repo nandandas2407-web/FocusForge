@@ -1,6 +1,5 @@
 package com.focusforge.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +9,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,28 +24,30 @@ public class WebsitesFragment extends Fragment {
     private EditText editDomain;
     private List<String> domains;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_websites, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.recyclerWebsites);
         editDomain = view.findViewById(R.id.editDomain);
         Button btnAdd = view.findViewById(R.id.btnAdd);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         domains = new ArrayList<>(FocusForgeConfig.blockedDomains);
         adapter = new WebsiteAdapter();
         recyclerView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> {
+            if (!isAdded()) return;
             String domain = editDomain.getText().toString().trim().toLowerCase();
             if (domain.isEmpty()) {
-                Toast.makeText(getActivity(), "Enter a domain", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Enter a domain", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (domain.startsWith("http://")) domain = domain.substring(7);
@@ -52,7 +56,7 @@ public class WebsitesFragment extends Fragment {
             if (domain.contains("/")) domain = domain.substring(0, domain.indexOf("/"));
 
             if (FocusForgeConfig.blockedDomains.contains(domain)) {
-                Toast.makeText(getActivity(), "Already blocked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Already blocked", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -60,26 +64,30 @@ public class WebsitesFragment extends Fragment {
             domains.add(domain);
             adapter.notifyItemInserted(domains.size() - 1);
             editDomain.setText("");
-            Toast.makeText(getActivity(), "Blocked: " + domain, Toast.LENGTH_SHORT).show();
+            FocusForgeConfig.save();
+            Toast.makeText(requireContext(), "Blocked: " + domain, Toast.LENGTH_SHORT).show();
         });
     }
 
     private class WebsiteAdapter extends RecyclerView.Adapter<WebsiteAdapter.ViewHolder> {
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_website, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             String domain = domains.get(position);
             holder.websiteDomain.setText(domain);
             holder.btnDelete.setOnClickListener(v -> {
                 int pos = holder.getAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION) return;
                 String removed = domains.remove(pos);
                 FocusForgeConfig.blockedDomains.remove(removed);
                 notifyItemRemoved(pos);
+                FocusForgeConfig.save();
             });
         }
 

@@ -1,6 +1,5 @@
 package com.focusforge.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +7,9 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,16 +21,17 @@ public class AppsFragment extends Fragment {
     private AppAdapter adapter;
     private List<AppItem> apps;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_apps, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerApps);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         loadApps();
         adapter = new AppAdapter();
         recyclerView.setAdapter(adapter);
@@ -36,14 +39,11 @@ public class AppsFragment extends Fragment {
 
     private void loadApps() {
         apps = new ArrayList<>();
-
         String[][] knownApps = {
             {"com.instagram.android", "Instagram"},
             {"com.zhiliaoapp.musically", "TikTok"},
-            {"com.ss.android.ugc.trill", "TikTok"},
             {"com.twitter.android", "Twitter / X"},
             {"com.facebook.katana", "Facebook"},
-            {"com.facebook.lite", "Facebook Lite"},
             {"com.google.android.youtube", "YouTube"},
             {"com.google.android.apps.youtube.music", "YouTube Music"},
             {"com.reddit.frontpage", "Reddit"},
@@ -54,40 +54,41 @@ public class AppsFragment extends Fragment {
             {"com.spotify.music", "Spotify"},
             {"com.netflix.mediaclient", "Netflix"},
             {"com.amazon.mShop.android.shopping", "Amazon"},
-            {"com.ebay.mobile", "eBay"},
             {"com.android.chrome", "Chrome"},
             {"org.mozilla.firefox", "Firefox"},
-            {"com.UCMobile", "UC Browser"},
             {"com.opera.browser", "Opera"},
             {"com.brave.browser", "Brave"},
-            {"com.viber.voip", "Viber"},
             {"org.telegram.messenger", "Telegram"},
             {"com.whatsapp", "WhatsApp"},
             {"com.google.android.gm", "Gmail"},
             {"com.google.android.apps.docs", "Google Docs"},
             {"com.google.android.apps.photos", "Google Photos"},
-            {"com.google.android.maps", "Google Maps"},
             {"com.waze", "Waze"},
             {"com.twitch.android.app", "Twitch"},
+            {"com.facebook.lite", "Facebook Lite"},
+            {"com.ebay.mobile", "eBay"},
+            {"com.UCMobile", "UC Browser"},
+            {"com.viber.voip", "Viber"},
         };
-
         for (String[] app : knownApps) {
             apps.add(new AppItem(app[0], app[1], FocusForgeConfig.blockedPackages.contains(app[0])));
         }
     }
 
     private class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_app, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             AppItem item = apps.get(position);
             holder.appName.setText(item.name);
             holder.appPackage.setText(item.packageName);
+            holder.appSwitch.setOnCheckedChangeListener(null);
             holder.appSwitch.setChecked(item.blocked);
             holder.appSwitch.setOnCheckedChangeListener((b, checked) -> {
                 item.blocked = checked;
@@ -96,6 +97,7 @@ public class AppsFragment extends Fragment {
                 } else {
                     FocusForgeConfig.blockedPackages.remove(item.packageName);
                 }
+                FocusForgeConfig.save();
             });
         }
 
